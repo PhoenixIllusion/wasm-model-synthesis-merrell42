@@ -25,7 +25,11 @@ set(INTERPROCEDURAL_OPTIMIZATION OFF)
 set(GENERATE_DEBUG_SYMBOLS ON)
 
 set(third_party_patch
+#  git apply ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/ifstream_patch.patch &&
+  cp ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/ifstream_.h src/parseInput/ &&
+  cp ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/ifstream_.cpp src/parseInput/ &&
   cp ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/xmlParser.h src/third_party/ &&
+  cp ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/xmlParser.cpp src/third_party/ &&
   cp ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/lodepng.h src/third_party/lodepng/ &&
   cp ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/lodepng.cpp src/third_party/lodepng/
   )
@@ -52,8 +56,12 @@ set(MODEL_SYNTH_SOURCE
   ${merrel42_model_synth_SOURCE_DIR}/src/parseInput/parseOverlapping.cpp
   ${merrel42_model_synth_SOURCE_DIR}/src/parseInput/parseSimpleTiled.cpp
   ${merrel42_model_synth_SOURCE_DIR}/src/parseInput/parseTiledModel.cpp
+)
+set(MODEL_SYNTH_SOURCE_CUSTOM
+  ${merrel42_model_synth_SOURCE_DIR}/src/parseInput/ifstream_.cpp
+  ${merrel42_model_synth_SOURCE_DIR}/src/third_party/xmlParser.cpp
   ${merrel42_model_synth_SOURCE_DIR}/src/third_party/lodepng/lodepng.cpp
-  )
+)
 set(MODEL_SYNTH_OBJECTS
   synthesizer.o
   Propagator.o
@@ -64,6 +72,10 @@ set(MODEL_SYNTH_OBJECTS
   parseOverlapping.o
   parseSimpleTiled.o
   parseTiledModel.o
+)
+set(MODEL_SYNTH_OBJECTS_CUSTOM
+  ifstream_.o
+  xmlParser.o
   lodepng.o
   )
 
@@ -82,6 +94,7 @@ set(EMCC_ARGS
   -s ENVIRONMENT='web,node'
   -s EXPORT_ES6=1
   -s EXPORT_NAME="Merrel42ModelSynth"
+  -s EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']
   -s MODULARIZE=1
   -s NO_EXIT_RUNTIME=1
   -s NO_FILESYSTEM=1
@@ -108,7 +121,6 @@ set(EMCC_WASM_COMPAT_ARGS ${EMCC_WASM_ARGS}
 
 set(EMCC_GLUE_ARGS
   -c
-  -s ASYNCIFY
   -I${merrel42_model_synth_SOURCE_DIR}/src
   -Wall
   -std=c++17
@@ -136,10 +148,21 @@ endif()
 project("Merrel42ModelSynth.js")
 
 add_custom_command(
-  OUTPUT ${MODEL_SYNTH_TARGETS}
+  OUTPUT ${MODEL_SYNTH_OBJECTS}
   COMMAND emcc ${EMCC_GLUE_ARGS} ${MODEL_SYNTH_SOURCE} -c
-  COMMAND emar rcs ${MODEL_SYNTH_TARGETS} ${MODEL_SYNTH_OBJECTS}
   DEPENDS ${MODEL_SYNTH_SOURCE}
+  COMMENT "Generating Merrel42ModelSynth.o"
+  VERBATIM)
+add_custom_command(
+  OUTPUT ${MODEL_SYNTH_OBJECTS_CUSTOM}
+  COMMAND emcc ${EMCC_GLUE_ARGS} ${MODEL_SYNTH_SOURCE_CUSTOM} -c
+  DEPENDS ${MODEL_SYNTH_SOURCE_CUSTOM}
+  COMMENT "Generating Custom Merrel42ModelSynth.o"
+  VERBATIM)
+add_custom_command(
+  OUTPUT ${MODEL_SYNTH_TARGETS}
+  COMMAND emar rcs ${MODEL_SYNTH_TARGETS} ${MODEL_SYNTH_OBJECTS} ${MODEL_SYNTH_OBJECTS_CUSTOM}
+  DEPENDS ${MODEL_SYNTH_OBJECTS} ${MODEL_SYNTH_OBJECTS_CUSTOM}
   COMMENT "Generating Merrel42ModelSynth.a"
   VERBATIM)
 add_custom_target(Merrel42ModelSynth-static ALL DEPENDS ${MODEL_SYNTH_TARGETS})

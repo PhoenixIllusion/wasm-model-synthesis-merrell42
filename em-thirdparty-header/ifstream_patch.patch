@@ -1,0 +1,41 @@
+diff --git a/src/parseInput/parseSimpleTiled.cpp b/src/parseInput/parseSimpleTiled.cpp
+index 9f28560..d53eb3c 100644
+--- a/src/parseInput/parseSimpleTiled.cpp
++++ b/src/parseInput/parseSimpleTiled.cpp
+@@ -7,6 +7,7 @@
+ #include <vector>
+ #include "parseInput.h"
+ #include "../third_party/lodepng/lodepng.h"
++#include "ifstream_.h"
+ 
+ using namespace std;
+ using namespace std::chrono;
+@@ -32,7 +33,7 @@ string remove0(string x) {
+ }
+ 
+ inline bool fileExists(const std::string& path) {
+-	ifstream file(path.c_str());
++	ifstream_ file(path.c_str());
+ 	return file.good();
+ }
+ 
+diff --git a/src/parseInput/parseTiledModel.cpp b/src/parseInput/parseTiledModel.cpp
+index 03b2d68..a468bd5 100644
+--- a/src/parseInput/parseTiledModel.cpp
++++ b/src/parseInput/parseTiledModel.cpp
+@@ -3,13 +3,14 @@
+ #include <fstream>
+ #include <sstream>
+ #include "parseTiledModel.h"
++#include "ifstream_.h"
+ 
+ using namespace std;
+ 
+ // Parse a <tiledmodel /> input.
+ void parseTiledModel(InputSettings& settings) {
+ 	string path = "samples/" + settings.name;
+-	ifstream modelFile(path, ios::in);
++	ifstream_ modelFile(path, ios::in);
+ 	if (!modelFile) {
+ 		cout << "ERROR: The model file :" << path << " does not exist.\n" << endl;
+ 		return;

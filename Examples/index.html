@@ -14,101 +14,21 @@
 			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
 			import initWASM from './js/Merrel42ModelSynth.wasm.js';
 
-const xml = `<samples>
-	<simpletiled name="Summer" width="15" height="15"/>
-  </samples>`;
+      await readXML('data/samples.xml');
+      await readXML('data/Summer/data.xml');
 
-      const jsonConfig = {
-        type: 'simpletiled',
-        name: 'Summer',
-        width: '15',
-        height: '15'
-      }
-
-      const parser = new DOMParser();
-      const docs = {
-        0: await fetch('data/samples.xml').then(res => res.text()).then(text => parser.parseFromString(text,'text/xml')),
-        'samples/Summer/data.xml': await fetch('data/Summer/data.xml').then(res => res.text()).then(text => parser.parseFromString(text,'text/xml'))
-      };
-
-      const nodeLookup = {};
-      let nodeId = 0;
-      const addNode = (node) => {
-        const ref = { node, nodeId: nodeId++ };
-        nodeLookup[ref.nodeId] = ref;
-        return ref.nodeId;
-      }
-      const XMLReader = {
-          openFileHelper: (path, element) => {
-            path = path && getStrW(path);
-            element = element && getStrW(element);
-            const node = {path, element, nodeId: nodeId++, node: docs[path].children[0]};
-            nodeLookup[node.nodeId] = node;
-            return node.nodeId;
-          },
-          getChildNodeN: (id, index) => {
-            const node = nodeLookup[id].node;
-            debugger;
-          },
-          getChildNodeC: (id, name, index) => {
-            name = getStrW(name);
-            const node = nodeLookup[id].node;
-            const children = node.querySelectorAll(name);
-            if(children[index]) {
-              return addNode(children[index]);
-            }
-            debugger;
-            return 0;
-          },
-          getChildNodeCR: (id, name, ref) => {
-            const tag = getStrW(name);
-            const node = nodeLookup[id].node;
-            if(ref == 0) {
-              return addNode(node.querySelector(tag));
-            }
-            debugger;
-
-          },
-          getChildNodeWithAttribute: (id, tagName, attributeN, attributeV) => {
-            tagName = getStrW(tagName);
-            attributeN = getStrW(attributeN);
-            attributeV = attributeV && getStrW(attributeV);
-            const node = nodeLookup[id].node;
-            debugger;
-          },
-          getAttributeStr: (id, name) => {
-            name = getStrW(name);
-            const node = nodeLookup[id].node;
-            const val = node.getAttribute(name);
-            if(val) {
-              return makeCString(val);
-            }
-            return makeCString('');
-          },
-          nChildNode: (id, name) => {
-            name = getStrW(name);
-            const node = nodeLookup[id].node;
-            const count = node.querySelectorAll(name).length;
-            return count;
-          },
-          getNameStr: (id) => {
-            const node = nodeLookup[id].node;
-            const val = node.tagName;
-            if(val) {
-              return makeCString(val);
-            }
-            return makeCString('');
-          }
-        }
-
-			initWASM({ XMLReader} ).then(function (module) {
+			initWASM({ XMLReader, IFStream, lodepng: LodePNG} ).then(async function (module) {
         window.module = module;
 
         const xml = module.Parser.prototype.readXML('sample.xml', 'samples');
+
+        //const xml = await module.ccall('emscripten_bind_Parser_readXML_2', 'number', ['string','string'], ['sample.xml', 'samples'], {async: true});
+
         const timer = new module.Microseconds();
 
-        const setting2 = module.Parser.prototype.parse(xml, timer);
+        const settings = module.Parser.prototype.parse(xml, timer);
 
+        /*
         const settings = new module.InputSettings();
         setU32(settings.size, [32, 32, 1]);
         setU32(settings.blockSize, [16, 16, 1]);
@@ -119,12 +39,33 @@ const xml = `<samples>
         const transition = new module.Transition(4);
         settings.name = new module.CString('test', 4); 
         settings.transition = transition;
-
+        */
+        module.Parser.prototype.setRandomSeed(3);
         const synth = new module.Synthesizer(settings, timer);
-        console.log(synth);
 
         synth.synthesize(timer);
-        console.log(synth);
+
+        const model = new module.Model(synth.getModel());
+        const [ width, height, depth ] = getU32(settings.size, 3);
+
+        const renderGrid = document.getElementById('container');
+        renderGrid.innerHTML = '';
+        renderGrid.style.gridTemplateColumns = `repeat(${width},1fr)`;
+        for(let z = 0; z < depth; z++)
+        for(let y = 0; y < height; y++) {
+          let line = [];
+          for(let x = 0; x < width; x++) {
+            const label = model.get(x,y,z);
+            const img = new Image();
+            const url = LoadPngLookupR[label].replace('samples', 'data');
+            if(/\d\./.test(url)) {
+              img.src = url
+            } else {
+              img.src = url.replace('.',' 0.');
+            }
+            renderGrid.appendChild(img);
+          }
+        }
 			});
 
 		</script>

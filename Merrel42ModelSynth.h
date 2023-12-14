@@ -57,6 +57,16 @@ class Transition {
     int _numLabels;
 };
 
+class Model {
+  public:
+    Model(ModelRef ref) { _ref = ref;}
+    long get(long x, long y, long z) {
+      return _ref[x][y][z];
+    }
+  private:
+  ModelRef _ref;
+};
+
 class Parser {
   public:
   static XMLNode* readXML(const wchar_t*  filename, const wchar_t* tag = NULL) {
@@ -65,4 +75,8 @@ class Parser {
   InputSettings* parse(const XMLNode& node, std::chrono::microseconds& inputTime) {
     return parseInput(node, inputTime);
   }
+  void setRandomSeed(int seed) {
+    srand(seed);
+  }
 };
+

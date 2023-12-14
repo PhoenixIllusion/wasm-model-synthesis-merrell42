@@ -9,12 +9,12 @@ const char* lodepng_error_text(unsigned code) {
 }
 
 
-unsigned lodepng::encode(const std::string& filename,
-                const std::vector<unsigned char>& in, unsigned w, unsigned h){
+unsigned lodepng::encode(const std::string &filename,
+                const std::vector<unsigned char> &in, unsigned w, unsigned h){
       return EM_ASM_INT({
           const method = Module['lodepng']['encode'];
           return method($0, $1, $2, $3, $4);
-      }, &in, w, h);
+      }, &filename, &in, w, h);
 }
 
 unsigned lodepng::decode(std::vector<unsigned char>& out, unsigned& w, unsigned& h,
@@ -31,4 +31,3 @@ unsigned lodepng::load_file(std::vector<unsigned char>& buffer, const std::strin
           return method($0, $1);
       }, &buffer, &filename);
 }
-  

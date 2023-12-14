@@ -19,27 +19,33 @@ interface FloatRef {
 };
 interface VectorFloat {
   void resize(long size);
+  void push_back(float val);
   FloatRef data();
 };
 interface VectorInt {
   void resize(long size);
+  void push_back(long val);
   IntRef data();
 };
 interface Vector2Int {
   void resize(long size);
+  void push_back([Ref] VectorInt val);
   VectorInt[] data();
 };
 interface Vector3Int {
   void resize(long size);
+  void push_back([Ref] Vector2Int val);
   Vector2Int[] data();
 };
 
 interface VectorChar {
   void resize(long size);
+  void push_back(long val);
   CharRef data();
 };
 interface Vector2Char {
   void resize(long size);
+  void push_back([Ref] VectorChar val);
   VectorChar[] data();
 };
 interface TransitionRef {
@@ -79,6 +85,11 @@ interface Transition {
   void remove();
 };
 
+interface Model {
+  void Model([Ref]ModelRef ref);
+  long get(long x, long y, long z);
+};
+
 interface Synthesizer {
   void Synthesizer(InputSettings newSettings, [Ref] Microseconds synthesisTime);
   void synthesize([Ref] Microseconds synthesisTime);
@@ -94,4 +105,5 @@ interface WCharRef {
 interface Parser {
   static XMLNode readXML([Const] WCharRef filename, [Const] optional WCharRef tag);
   static InputSettings parse([Const, Ref] XMLNode node, [Ref] Microseconds inputTime);
+  static void setRandomSeed(long seed);
 };
