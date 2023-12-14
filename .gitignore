@@ -1,0 +1,4 @@
+/Build
+/dist
+/Examples/js/*.wasm.*
+/Examples/data/Summer/

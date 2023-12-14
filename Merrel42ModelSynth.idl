@@ -1,0 +1,97 @@
+interface Microseconds {
+  void Microseconds();
+  long long count();
+};
+interface SizeRef {
+
+};
+interface CString {
+  void CString( DOMString s, long count);
+  [Const] DOMString c_str();
+};
+interface ModelRef {
+};
+interface CharRef {
+};
+interface IntRef {
+};
+interface FloatRef {
+};
+interface VectorFloat {
+  void resize(long size);
+  FloatRef data();
+};
+interface VectorInt {
+  void resize(long size);
+  IntRef data();
+};
+interface Vector2Int {
+  void resize(long size);
+  VectorInt[] data();
+};
+interface Vector3Int {
+  void resize(long size);
+  Vector2Int[] data();
+};
+
+interface VectorChar {
+  void resize(long size);
+  CharRef data();
+};
+interface Vector2Char {
+  void resize(long size);
+  VectorChar[] data();
+};
+interface TransitionRef {
+};
+
+interface InputSettings {
+  void InputSettings();
+  [Value] attribute CString name;
+  attribute boolean useAc4;
+  [Value] readonly attribute SizeRef size;
+  [Value] readonly attribute SizeRef blockSize;
+  [Value] attribute VectorFloat weights;
+  attribute long numLabels;
+  [Value] attribute TransitionRef transition;
+  [Value] attribute Vector3Int supporting;
+  [Value] attribute Vector2Int supportCount;
+  [Value] attribute CString tiledModelSuffix;
+  [Value] attribute Vector2Char tileImages;
+  attribute long tileWidth;
+  attribute long tileHeight;
+  attribute boolean periodic;
+  attribute long numDims;
+
+  [Value] attribute CString type;
+  [Value] attribute CString subset;
+
+  attribute boolean periodicInput;
+  attribute long ground;
+  attribute long symmetry;
+};
+
+interface Transition {
+  void Transition(long numLabels);
+  void set(long layer, long aIndex, long bIndex, boolean val);
+  boolean get(long layer, long aIndex, long bIndex);
+  [Value] TransitionRef ref();
+  void remove();
+};
+
+interface Synthesizer {
+  void Synthesizer(InputSettings newSettings, [Ref] Microseconds synthesisTime);
+  void synthesize([Ref] Microseconds synthesisTime);
+  [Value] ModelRef getModel();
+};
+
+interface XMLNode {
+
+};
+interface WCharRef {
+
+};
+interface Parser {
+  static XMLNode readXML([Const] WCharRef filename, [Const] optional WCharRef tag);
+  static InputSettings parse([Const, Ref] XMLNode node, [Ref] Microseconds inputTime);
+};

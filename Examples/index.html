@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Merrel42 Model Synth demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initWASM from './js/Merrel42ModelSynth.wasm.js';
+
+const xml = `<samples>
+	<simpletiled name="Summer" width="15" height="15"/>
+  </samples>`;
+
+      const jsonConfig = {
+        type: 'simpletiled',
+        name: 'Summer',
+        width: '15',
+        height: '15'
+      }
+
+      const parser = new DOMParser();
+      const docs = {
+        0: await fetch('data/samples.xml').then(res => res.text()).then(text => parser.parseFromString(text,'text/xml')),
+        'samples/Summer/data.xml': await fetch('data/Summer/data.xml').then(res => res.text()).then(text => parser.parseFromString(text,'text/xml'))
+      };
+
+      const nodeLookup = {};
+      let nodeId = 0;
+      const addNode = (node) => {
+        const ref = { node, nodeId: nodeId++ };
+        nodeLookup[ref.nodeId] = ref;
+        return ref.nodeId;
+      }
+      const XMLReader = {
+          openFileHelper: (path, element) => {
+            path = path && getStrW(path);
+            element = element && getStrW(element);
+            const node = {path, element, nodeId: nodeId++, node: docs[path].children[0]};
+            nodeLookup[node.nodeId] = node;
+            return node.nodeId;
+          },
+          getChildNodeN: (id, index) => {
+            const node = nodeLookup[id].node;
+            debugger;
+          },
+          getChildNodeC: (id, name, index) => {
+            name = getStrW(name);
+            const node = nodeLookup[id].node;
+            const children = node.querySelectorAll(name);
+            if(children[index]) {
+              return addNode(children[index]);
+            }
+            debugger;
+            return 0;
+          },
+          getChildNodeCR: (id, name, ref) => {
+            const tag = getStrW(name);
+            const node = nodeLookup[id].node;
+            if(ref == 0) {
+              return addNode(node.querySelector(tag));
+            }
+            debugger;
+
+          },
+          getChildNodeWithAttribute: (id, tagName, attributeN, attributeV) => {
+            tagName = getStrW(tagName);
+            attributeN = getStrW(attributeN);
+            attributeV = attributeV && getStrW(attributeV);
+            const node = nodeLookup[id].node;
+            debugger;
+          },
+          getAttributeStr: (id, name) => {
+            name = getStrW(name);
+            const node = nodeLookup[id].node;
+            const val = node.getAttribute(name);
+            if(val) {
+              return makeCString(val);
+            }
+            return makeCString('');
+          },
+          nChildNode: (id, name) => {
+            name = getStrW(name);
+            const node = nodeLookup[id].node;
+            const count = node.querySelectorAll(name).length;
+            return count;
+          },
+          getNameStr: (id) => {
+            const node = nodeLookup[id].node;
+            const val = node.tagName;
+            if(val) {
+              return makeCString(val);
+            }
+            return makeCString('');
+          }
+        }
+
+			initWASM({ XMLReader} ).then(function (module) {
+        window.module = module;
+
+        const xml = module.Parser.prototype.readXML('sample.xml', 'samples');
+        const timer = new module.Microseconds();
+
+        const setting2 = module.Parser.prototype.parse(xml, timer);
+
+        const settings = new module.InputSettings();
+        setU32(settings.size, [32, 32, 1]);
+        setU32(settings.blockSize, [16, 16, 1]);
+        settings.periodic = false;
+        settings.numDims = 2;
+        settings.initialLabels = createU32(1, [0]);
+
+        const transition = new module.Transition(4);
+        settings.name = new module.CString('test', 4); 
+        settings.transition = transition;
+
+        const synth = new module.Synthesizer(settings, timer);
+        console.log(synth);
+
+        synth.synthesize(timer);
+        console.log(synth);
+			});
+
+		</script>
+	</body>
+</html>
