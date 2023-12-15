@@ -15,9 +15,9 @@ using Microseconds = std::chrono::microseconds;
 
 using SizeRef = int[3];
 
-using IntRef = int;
-using FloatRef = float;
-using CharRef = unsigned char;
+using IntRef = int *;
+using FloatRef = float *;
+using CharRef = unsigned char *;
 using WCharRef = wchar_t;
 
 using ModelRef = int***;

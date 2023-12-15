@@ -1,5 +1,5 @@
 diff --git a/src/parseInput/parseSimpleTiled.cpp b/src/parseInput/parseSimpleTiled.cpp
-index 9f28560..d53eb3c 100644
+index 9f28560..f662ff9 100644
 --- a/src/parseInput/parseSimpleTiled.cpp
 +++ b/src/parseInput/parseSimpleTiled.cpp
 @@ -7,6 +7,7 @@
@@ -10,15 +10,16 @@ index 9f28560..d53eb3c 100644
  
  using namespace std;
  using namespace std::chrono;
-@@ -32,7 +33,7 @@ string remove0(string x) {
+@@ -32,8 +33,7 @@ string remove0(string x) {
  }
  
  inline bool fileExists(const std::string& path) {
 -	ifstream file(path.c_str());
-+	ifstream_ file(path.c_str());
- 	return file.good();
+-	return file.good();
++	return ifstream_::exists(path.c_str());
  }
  
+ // Try several different options for the path:
 diff --git a/src/parseInput/parseTiledModel.cpp b/src/parseInput/parseTiledModel.cpp
 index 03b2d68..a468bd5 100644
 --- a/src/parseInput/parseTiledModel.cpp

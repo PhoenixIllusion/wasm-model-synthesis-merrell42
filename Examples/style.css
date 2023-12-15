@@ -13,3 +13,34 @@ body {
 	width: 100%;
 	padding: 5px;
 }
+
+.tile {
+	min-width: 32px;
+	min-height: 32px;
+}
+canvas.overlapping {
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+.tile.version-1 {
+	transform: rotate(-90deg)
+}
+.tile.version-2 {
+	transform: rotate(180deg)
+}
+.tile.version-3 {
+	transform: rotate(90deg)
+}
+.tile.version-4 {
+	transform: scaleX(-1)
+}
+.tile.version-5 {
+	transform: scaleY(-1) rotate(-90deg)
+}
+.tile.version-6 {
+	transform: scaleX(-1) rotate(180deg)
+}
+.tile.version-7 {
+	transform: scaleY(-1) rotate(90deg)
+}

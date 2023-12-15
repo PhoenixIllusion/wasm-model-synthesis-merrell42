@@ -5,8 +5,22 @@
 
 class ifstream_ {
 	public:
-		my_ifstream(std::string * path, char flags = 0);
-		bool good();
+    ifstream_(std::string path, char flags = 0);
+    
+		bool good() {
+      return id != -1;
+    }
+		void getline(char * buffer, int len);
+
+    bool operator!() {
+      return id != -1;
+    }
+    static bool exists(const char * path);
+    void operator >> (int &i);
+    std::string rdbuf();
+
+  private:
+    int id = -1;
 };
 
 

@@ -7,6 +7,7 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
+    <select id="sample-select"></select><br />
 		<div id="container">Loading...</div>
 		<script src="js/example.js"></script>
 
@@ -14,24 +15,76 @@
 			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
 			import initWASM from './js/Merrel42ModelSynth.wasm.js';
 
-      await readXML('data/samples.xml');
-      await readXML('data/Summer/data.xml');
+      const url = new URL(location.href);
+      const query = (key) => {
+        const val = url.searchParams.get(key);
+        if (val) { return parseInt(val); }
+        return 0;
+      }
+
+      //Pre-load files since not yet using Asyncify
+      const sampleIndex = query('sample')||0;
+      const sRandSeed = query('seed')||0;
+      const info = await readXML(`samples.xml`);
+      const entries = [... info.children];
+      const sample = entries[sampleIndex];
+
+      const sampleSelect = document.querySelector('#sample-select');
+      entries.forEach((entry,i) => {
+        const option = document.createElement('option');
+        option.value = i;
+        const a = x => entry.getAttribute(x);
+        const [ name, subset, width, height, periodic ] = [
+          'name', 'subset', 'width', 'height', 'periodic'
+        ].map(a);
+        if(entry.tagName === 'simpletiled') {
+          option.innerText = `${entry.tagName} - ${name}${subset?`[${subset}]`:''} - ${width}x${height} ${periodic ? '- periodic':''}`;
+        }
+        if(entry.tagName === 'overlapping') {
+          const [ N, symmetry, periodicInput ] = ['N', 'symmetry', 'periodicInput' ].map(a);
+          option.innerText =  `${entry.tagName} - ${name} - N${N} ${symmetry ? ' - symmetry:'+symmetry : '' } - ${width||48}x${height||48} ${periodicInput ? '- periodicInput ':''} ${periodic ? '- periodic ':''}`;
+        }
+        if(i == sampleIndex) {
+          option.selected = true;
+          document.title += ': '+ option.innerText;
+        }
+        sampleSelect.appendChild(option);
+      });
+      sampleSelect.onchange = () => location.href='index.html?sample='+sampleSelect.value+'&seed='+sRandSeed;
+      if(sample.tagName === 'simpletiled') {
+        await readXML(`samples/${entries[sampleIndex].getAttribute('name')}/data.xml`);
+      }
+      if(sample.tagName === 'overlapping') {
+        await readImage(`samples/${entries[sampleIndex].getAttribute('name')}.png`)
+      }
+
+      const createTile = (label) => {
+        const img = new Image();
+        const version = / ?(\d)?\./.exec(LoadPngLookupR[label])[1]||0;
+        const url = LoadPngLookupR[label].replace(/ \d\./g,'.');
+        img.src = url;
+        img.className +=' tile version-'+version;
+        return img;
+      }
+      const drawTile = (ctx, label, x, y) => {
+        const imgData = SavePngData[label].data;
+        ctx.putImageData(imgData, x, y);
+      }
 
 			initWASM({ XMLReader, IFStream, lodepng: LodePNG} ).then(async function (module) {
         window.module = module;
 
-        const xml = module.Parser.prototype.readXML('sample.xml', 'samples');
+        const xml = module.Parser.prototype.readXML(makeStrW('samples.xml'));
 
         //const xml = await module.ccall('emscripten_bind_Parser_readXML_2', 'number', ['string','string'], ['sample.xml', 'samples'], {async: true});
 
         const timer = new module.Microseconds();
 
-        const settings = module.Parser.prototype.parse(xml, timer);
+        const settings = module.Parser.prototype.parse(new module.XMLNode(XMLReader.getChildNodeN(1, sampleIndex)), timer);
 
         /*
         const settings = new module.InputSettings();
         setU32(settings.size, [32, 32, 1]);
-        setU32(settings.blockSize, [16, 16, 1]);
         settings.periodic = false;
         settings.numDims = 2;
         settings.initialLabels = createU32(1, [0]);
@@ -40,7 +93,8 @@
         settings.name = new module.CString('test', 4); 
         settings.transition = transition;
         */
-        module.Parser.prototype.setRandomSeed(3);
+        module.Parser.prototype.setRandomSeed(sRandSeed);
+        settings.useAc4 = false;
         const synth = new module.Synthesizer(settings, timer);
 
         synth.synthesize(timer);
@@ -50,22 +104,41 @@
 
         const renderGrid = document.getElementById('container');
         renderGrid.innerHTML = '';
-        renderGrid.style.gridTemplateColumns = `repeat(${width},1fr)`;
+        if(sample.tagName === 'simpletiled') {
+          renderGrid.style.gridTemplateColumns = `repeat(${width},1fr)`;
+        }
+        let ctx;
+        let tileSize;
+        if(sample.tagName === 'overlapping') {
+          const canvas = document.createElement('canvas');
+          renderGrid.appendChild(canvas);
+          canvas.className = 'overlapping';
+          canvas.style.width = 16*width + 'px';
+          canvas.style.width = 16*height + 'px';
+          canvas.width = width;
+          canvas.height = height;
+          ctx = canvas.getContext('2d');
+        }
         for(let z = 0; z < depth; z++)
         for(let y = 0; y < height; y++) {
           let line = [];
           for(let x = 0; x < width; x++) {
             const label = model.get(x,y,z);
-            const img = new Image();
-            const url = LoadPngLookupR[label].replace('samples', 'data');
-            if(/\d\./.test(url)) {
-              img.src = url
-            } else {
-              img.src = url.replace('.',' 0.');
+            if(sample.tagName === 'simpletiled') {
+                renderGrid.appendChild(createTile(label));
             }
-            renderGrid.appendChild(img);
+            if(sample.tagName === 'overlapping') {
+              drawTile(ctx, label, x , y );
+            }
           }
         }
+        const logDiv = document.createElement('div');
+        const log = `sRand SEED: ${sRandSeed}\nPropagator - ${settings.useAc4? 'AC4':'AC3'}\n
+        SampleName: ${settings.name.c_str()}\nSize: ${width}x${height}x${depth}\n\n
+        TileCount: ${settings.numLabels}\nRuleCount: `;
+        logDiv.innerText = log;
+        document.body.appendChild(logDiv);
+        console.log(settings.size.get(0),settings.size.get(1),settings.size.get(2))
 			});
 
 		</script>

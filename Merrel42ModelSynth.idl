@@ -3,7 +3,8 @@ interface Microseconds {
   long long count();
 };
 interface SizeRef {
-
+  [Operator="[]"] long get(long x);
+  [Operator=")[index]=("] long set(long x,long index);
 };
 interface CString {
   void CString( DOMString s, long count);
@@ -12,41 +13,56 @@ interface CString {
 interface ModelRef {
 };
 interface CharRef {
+  [Operator="[]"] long get(long x);
+  [Operator=")[index]=("] long set(long x,long index);
 };
 interface IntRef {
+  [Operator="[]"] long get(long x);
+  [Operator=")[index]=("] long set(long x,long index);
 };
 interface FloatRef {
+  [Operator="[]"] float get(long x);
+  [Operator=")[index]=("] long set(float x,long index);
 };
 interface VectorFloat {
-  void resize(long size);
   void push_back(float val);
-  FloatRef data();
+  [Value] FloatRef data();
+  [Operator="[]"] float get(long x);
+  [Operator=")[index]=("] long set(float x,long index);
+  long size(); void resize(long size);
 };
 interface VectorInt {
-  void resize(long size);
   void push_back(long val);
-  IntRef data();
+  [Value] IntRef data();
+  [Operator="[]"] long get(long x);
+  [Operator=")[index]=("] long set(long x,long index);
+  long size(); void resize(long size);
 };
 interface Vector2Int {
-  void resize(long size);
   void push_back([Ref] VectorInt val);
-  VectorInt[] data();
+  [Value, Operator="[]"] VectorInt get(long x);
+  [Operator=")[index]=("] void set([Ref] VectorInt x,long index);
+  long size(); void resize(long size);
 };
 interface Vector3Int {
-  void resize(long size);
   void push_back([Ref] Vector2Int val);
-  Vector2Int[] data();
+  [Value, Operator="[]"] Vector2Int get(long x);
+  [Operator=")[index]=("] void set([Ref] Vector2Int x,long index);
+  long size(); void resize(long size);
 };
 
 interface VectorChar {
-  void resize(long size);
   void push_back(long val);
-  CharRef data();
+  [Value] CharRef data();
+  [Operator="[]"] long get(long x);
+  [Operator=")[index]=("] void set(long x,long index);
+  long size(); void resize(long size);
 };
 interface Vector2Char {
-  void resize(long size);
   void push_back([Ref] VectorChar val);
-  VectorChar[] data();
+  [Value, Operator="[]"] VectorChar get(long x);
+  [Operator=")[index]=("] void set([Ref] VectorChar x,long index);
+  long size(); void resize(long size);
 };
 interface TransitionRef {
 };
@@ -97,7 +113,7 @@ interface Synthesizer {
 };
 
 interface XMLNode {
-
+  void XMLNode(long id);
 };
 interface WCharRef {
 
@@ -107,3 +123,22 @@ interface Parser {
   static InputSettings parse([Const, Ref] XMLNode node, [Ref] Microseconds inputTime);
   static void setRandomSeed(long seed);
 };
+
+interface Propagator {
+  boolean setBlockLabel(long label, [Ref] SizeRef position);
+  boolean removeLabel(long label, [Ref] SizeRef position);
+  void resetBlock();
+  boolean isPossible(long x, long y, long z, long label);
+  long pickLabel(long x, long y, long z);
+};
+
+[NoDelete]
+interface PropagatorAc4{
+  void PropagatorAc4(InputSettings newSettings, [Ref] SizeRef newPossibilitySize, [Ref] SizeRef newOffset);
+};
+PropagatorAc4 implements Propagator;
+[NoDelete]
+interface PropagatorAc3{
+  void PropagatorAc3(InputSettings newSettings, [Ref] SizeRef newPossibilitySize, [Ref] SizeRef newOffset);
+};
+PropagatorAc4 implements Propagator;
