@@ -2,3 +2,4 @@
 /dist
 /Examples/js/*.wasm.*
 /Examples/samples
+node_modules

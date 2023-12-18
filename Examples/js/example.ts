@@ -1,51 +1,56 @@
-window.module = undefined;
+import Merrel42ModelSynth from '../../dist/Merrel42ModelSynth.wasm'
+let module!: typeof Merrel42ModelSynth;
+
+export function setWASM(_module: typeof Merrel42ModelSynth) {
+  module = _module;
+}
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
-function getStrW(idx) {
-  let start = idx;
-  const str = [];
-  let char;
+function getStrW(idx: number) {
+  const start = idx;
+  const str: number[] = [];
+  let char: number;
   while((char = module.HEAP8[idx]) != 0 && idx-start < 1024) {str.push(char); idx+=4;};
   return decoder.decode(new Uint8Array(str));
 }
-function getStr(idx) {
+function getStr(idx: number): string {
   let start = idx;
-  const str = [];
-  let char;
+  const str: number[] = [];
+  let char: number;
   while((char = module.HEAPU8[idx]) != 0 && idx-start < 1024) {str.push(char); idx++;};
   return decoder.decode(new Uint8Array(str));
 }
-function makeCString(str) {
+function makeCString(str: string): number {
   return module.getPointer(new module.CString(str, str.length));
 }
 
-function makeStrW(str) {
+export function makeStrW(str: string): number {
   const bytes = encoder.encode(str);
-  const ref = module._webidl_malloc(bytes.length * 4 + 1);
+  const ref = module['_webidl_malloc'](bytes.length * 4 + 1);
   const arr = module.HEAPU8.subarray(ref, ref+bytes.length*4);
   for(let i=0;i<str.length;i++){
     arr[i*4] = bytes[i];
   }
   return ref;
 }
-function makeRawString(str) {
+function makeRawString(str: string): number {
   return module.getPointer(new module.CString(str, str.length).c_str());
 }
 
-function createU32(size, value) {
-  const ref = module._webidl_malloc(size * 4);
+function createU32(size: number, value: number[]): number {
+  const ref = module['_webidl_malloc'](size * 4);
   module.HEAPU32.set(value, ref/4);
   return ref;
 }
 
-function setU32(ref, value) {
+function setU32(ref: number|any, value: number[]): void {
   if(typeof ref == 'object') {
     ref = module.getPointer(ref);
   }
   module.HEAPU32.set(value, ref/4);
 }
-function getU32(ref, len) {
+export function getU32(ref: number|any, len: number): Uint32Array {
   if(typeof ref == 'object') {
     ref = module.getPointer(ref);
   }
@@ -54,8 +59,10 @@ function getU32(ref, len) {
 
 
 const parser = new DOMParser();
-const docCache = {}
-const readXML = (path) => {
+const docCache: {
+  [key: string]: Element
+} = {}
+export const readXML = (path: string): Promise<Element>|Element => {
   if(docCache[path]) {
     return docCache[path];
   }
@@ -66,9 +73,16 @@ const readXML = (path) => {
   });
 }
 
-const xmlNodeLookup = {};
+const xmlNodeLookup: {
+  [key: number]: {
+    node: Element;
+    nodeId: number;
+    path?: string;
+    element?: string;
+  }
+} = {};
 let xmlNodeId = 1;
-const addNode = (node) => {
+const addNode = (node: Element): number => {
   if(!node) {
     throw Error('Failed to find node');
   }
@@ -76,22 +90,22 @@ const addNode = (node) => {
   xmlNodeLookup[ref.nodeId] = ref;
   return ref.nodeId;
 }
-const XMLReader = {
-    openFileHelper: (path, element) => {
-      path = path && getStrW(path);
-      element = element && getStrW(element);
-      const node = {path, element, nodeId: xmlNodeId++, node: readXML(path)};
+export const XMLReader = {
+    openFileHelper: (path: string, element: string) => {
+      path = path && getStrW(path as any as number);
+      element = element && getStrW(element as any as number);
+      const node = {path, element, nodeId: xmlNodeId++, node: readXML(path) as Element};
       xmlNodeLookup[node.nodeId] = node;
       return node.nodeId;
     },
-    getChildNodeN: (id, index) => {
+    getChildNodeN: (id: number, index: number) => {
       const node = xmlNodeLookup[id].node;
       if(node.children[index]) {
         return addNode(node.children[index]);
       }
     },
-    getChildNodeC: (id, name, index) => {
-      name = getStrW(name);
+    getChildNodeC: (id: number, name: string, index: number) => {
+      name = getStrW(name as any as number);
       const node = xmlNodeLookup[id].node;
       const children = node.querySelectorAll(name);
       if(children[index]) {
@@ -100,25 +114,25 @@ const XMLReader = {
       debugger;
       return 0;
     },
-    getChildNodeCR: (id, name, ref) => {
-      const tag = getStrW(name);
+    getChildNodeCR: (id: number, name: string, ref: number) => {
+      const tag = getStrW(name as any as number);
       const node = xmlNodeLookup[id].node;
       if(ref == 0) {
-        return addNode(node.querySelector(tag));
+        return addNode(node.querySelector(tag)!);
       }
       debugger;
 
     },
-    getChildNodeWithAttribute: (id, tagName, attributeN, attributeV) => {
-      tagName = getStrW(tagName);
-      attributeN = getStrW(attributeN);
-      attributeV = attributeV && getStrW(attributeV);
+    getChildNodeWithAttribute: (id: number, tagName: string, attributeN: string, attributeV?: string) => {
+      tagName = getStrW(tagName as any as number);
+      attributeN = getStrW(attributeN as any as number);
+      attributeV = attributeV && getStrW(attributeV as any as number);
       const node = xmlNodeLookup[id].node;
       let query = `${tagName}[${attributeN}${attributeV?'="'+attributeV+'"':''}]`;
-      return addNode(node.querySelector(query));
+      return addNode(node.querySelector(query)!);
     },
-    getAttributeStr: (id, name) => {
-      name = getStrW(name);
+    getAttributeStr: (id: number, name: string): number => {
+      name = getStrW(name as any as number);
       const node = xmlNodeLookup[id].node;
       const val = node.getAttribute(name);
       if(val) {
@@ -126,13 +140,13 @@ const XMLReader = {
       }
       return makeCString('');
     },
-    nChildNode: (id, name) => {
-      name = getStrW(name);
+    nChildNode: (id: number, name: string): number => {
+      name = getStrW(name as any as number);
       const node = xmlNodeLookup[id].node;
       const count = node.querySelectorAll(name).length;
       return count;
     },
-    getNameStr: (id) => {
+    getNameStr: (id: number): number => {
       const node = xmlNodeLookup[id].node;
       const val = node.tagName;
       if(val) {
@@ -144,50 +158,50 @@ const XMLReader = {
 
   const streamLookup = {};
   let streamId = 1;
-  const IFStream = {
-    constructor: (url, flag) => {
-      url = getStr(url);
+export const IFStream = {
+    constructor: (url: string, _flag: number) => {
+      url = getStr(url as any as number);
       debugger;
     },
-    exists: (url) => {
-      url = getStr(url);
+    exists: (url: string): boolean => {
+      url = getStr(url as any as number);
       return true;
     },
-    getline: (id, buffer, len) => {
+    getline: (_id: number, _buffer: Merrel42ModelSynth.CharRef, _len: number) => {
       debugger;
     },
-    rdbuf: (id) => {
+    rdbuf: (_id: number) => {
       debugger;
     }
   }
 
   let LoadPngId = 0;
-  const LoadPngLookupR = {
+  export const LoadPngLookupR: { [key: number]: string} = {
 
   }
-  const LoadPngLookup = {
+  const LoadPngLookup: { [key: string]: number} = {
 
   }
-  const LoadPngData = {
+  const LoadPngData: { [key: string]: ImageData } = {
 
   }
   let SavePngId = 0;
-  const SavePngData = {
+  export const SavePngData: { [key: number]: { path: string, data: ImageData }} = {
 
   }
 
   const tmpCanvas = document.createElement('canvas');
-  const readImage = (path) => {
+  export const readImage = (path: string): ImageData|Promise<ImageData> => {
     if(LoadPngData[path]) {
       return LoadPngData[path];
     }
-    return new Promise(resolve => {
+    return new Promise<ImageData>(resolve => {
       const img = new Image();
       img.src = path;
       img.onload = () => {
         tmpCanvas.width = img.width;
         tmpCanvas.height = img.height;
-        const ctx = tmpCanvas.getContext('2d');
+        const ctx = tmpCanvas.getContext('2d')!;
         ctx.drawImage(img, 0, 0);
         LoadPngData[path] = ctx.getImageData(0,0,img.width, img.height);
         resolve(LoadPngData[path]);
@@ -195,15 +209,14 @@ const XMLReader = {
     })
   }
 
-  const LodePNG = {
-    error_text: (code) => {
-      debugger;
+export const LodePNG = {
+    error_text: (code: number): number => {
       return makeRawString('Error '+code);
     },
-    load_file: (buffer, path) => {
-      path = module.wrapPointer(path, module.CString).c_str();
+    load_file: (buffer: Merrel42ModelSynth.VectorChar, path: string): number => {
+      path = module.wrapPointer(path as any as number, module.CString).c_str();
 
-      buffer = module.wrapPointer(buffer, module.VectorChar);
+      buffer = module.wrapPointer(buffer as any as number, module.VectorChar);
       buffer.resize(4);
       const rawData = module.HEAPU32[module.getPointer(buffer.data())/4];
       module.HEAPU32.subarray(rawData, rawData + 1)[0] = LoadPngId;
@@ -214,9 +227,9 @@ const XMLReader = {
 
       return 0;
     },
-    decode: (outVecC, wRef, hRef, stateRef, inVecC) => {
-      outVecC = module.wrapPointer(outVecC, module.VectorChar);
-      inVecC = module.wrapPointer(inVecC, module.VectorChar);
+    decode: (outVecC: Merrel42ModelSynth.VectorChar, wRef: number, hRef: number, _stateRef: number, inVecC: Merrel42ModelSynth.VectorChar): number => {
+      outVecC = module.wrapPointer(outVecC as any as number, module.VectorChar);
+      inVecC = module.wrapPointer(inVecC as any as number, module.VectorChar);
       const rawInData = module.HEAPU32[module.getPointer(inVecC.data())/4];
       const inImageId = module.HEAPU32.subarray(rawInData, rawInData + 1)[0];
       const imgPath = LoadPngLookupR[inImageId];
@@ -240,9 +253,9 @@ const XMLReader = {
 
       return 0;
     },
-    encode: (path, inVecC, w, h) => {
-      path = module.wrapPointer(path, module.CString).c_str();
-      inVecC = module.wrapPointer(inVecC, module.VectorChar);
+    encode: (path: string, inVecC: Merrel42ModelSynth.VectorChar, w: number, h: number): number => {
+      path = module.wrapPointer(path as any as number, module.CString).c_str();
+      inVecC = module.wrapPointer(inVecC as any as number, module.VectorChar);
       const inSize = inVecC.size();
       const rawInData = module.HEAPU32[module.getPointer(inVecC.data())/4];
       const saveId = SavePngId++;

@@ -1,0 +1,17 @@
+{
+  "name": "@phoenixillusion/wasm-model-synthesis-merrell42-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "5.2.2",
+    "vite": "4.5.0"
+  },
+  "type": "module",
+  "dependencies": {}
+}

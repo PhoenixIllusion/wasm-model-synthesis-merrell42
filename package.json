@@ -1,0 +1,29 @@
+{
+  "name": "@phoenixillusion/wasm-model-synthesis-merrell42",
+  "version": "1.0.0",
+  "description": "Port of https://github.com/merrell42/model-synthesis to use WASM",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PhoenixIllusion/wasm-model-synthesis-merrell42.git"
+  },
+  "keywords": [
+    "WASM",
+    "AC3",
+    "AC4",
+    "Model-Synthesis",
+    "CSP"
+  ],
+  "author": "Phoenix Illusion",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PhoenixIllusion/wasm-model-synthesis-merrell42/issues"
+  },
+  "homepage": "https://github.com/PhoenixIllusion/wasm-model-synthesis-merrell42#readme",
+  "dependencies": {
+    "typescript": "5.3.3"
+  }
+}
