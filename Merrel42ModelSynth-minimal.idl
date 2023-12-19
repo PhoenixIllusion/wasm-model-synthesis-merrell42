@@ -1,0 +1,114 @@
+interface Microseconds {
+  void Microseconds();
+  long long count();
+};
+interface SizeRef {
+  [Operator="[]"] long get(long x);
+  [Operator=")[index]=("] long set(long x,long index);
+};
+interface CString {
+  void CString( DOMString s, long count);
+  [Const] DOMString c_str();
+};
+interface ModelRef {
+};
+
+interface IntPtr {
+
+};
+interface IntRef {
+  [Operator="[]"] long get(long x);
+  [Operator=")[index]=("] long set(long x,long index);
+};
+interface FloatRef {
+  [Operator="[]"] float get(long x);
+  [Operator=")[index]=("] long set(float x,long index);
+};
+interface VectorFloat {
+  void push_back(float val);
+  [Value] FloatRef data();
+  [Operator="[]"] float get(long x);
+  [Operator=")[index]=("] long set(float x,long index);
+  long size(); void resize(long size);
+};
+interface VectorInt {
+  void VectorInt();
+  void push_back(long val);
+  [Value] IntRef data();
+  [Operator="[]"] long get(long x);
+  [Operator=")[index]=("] long set(long x,long index);
+  long size(); void resize(long size);
+};
+interface Vector2Int {
+  void Vector2Int();
+  void push_back([Ref] VectorInt val);
+  [Value, Operator="[]"] VectorInt get(long x);
+  [Operator=")[index]=("] void set([Ref] VectorInt x,long index);
+  long size(); void resize(long size);
+};
+interface Vector3Int {
+  void push_back([Ref] Vector2Int val);
+  [Value, Operator="[]"] Vector2Int get(long x);
+  [Operator=")[index]=("] void set([Ref] Vector2Int x,long index);
+  long size(); void resize(long size);
+};
+
+
+interface TransitionRef {
+};
+
+interface InputSettings {
+  void InputSettings();
+  [Value] attribute CString name;
+  attribute boolean useAc4;
+  [Value] readonly attribute SizeRef size;
+  [Value] readonly attribute SizeRef blockSize;
+  [Value] attribute VectorFloat weights;
+  attribute long numLabels;
+  attribute IntPtr initialLabels;
+  attribute TransitionRef transition;
+  [Value] attribute Vector3Int supporting;
+  [Value] attribute Vector2Int supportCount;
+  attribute boolean periodic;
+  attribute long numDims;
+
+  attribute long ground;
+};
+
+interface Transition {
+  void Transition(long numLabels);
+  void set(long layer, long aIndex, long bIndex, boolean val);
+  boolean get(long layer, long aIndex, long bIndex);
+  TransitionRef ref();
+  void remove();
+};
+
+interface Model {
+  void Model([Ref]ModelRef ref);
+  long get(long x, long y, long z);
+};
+
+interface Synthesizer {
+  void Synthesizer(InputSettings newSettings, [Ref] Microseconds synthesisTime);
+  void synthesize([Ref] Microseconds synthesisTime);
+  [Value] ModelRef getModel();
+};
+
+interface Propagator {
+  boolean setBlockLabel(long label, [Ref] SizeRef position);
+  boolean removeLabel(long label, [Ref] SizeRef position);
+  void resetBlock();
+  boolean isPossible(long x, long y, long z, long label);
+  long pickLabel(long x, long y, long z);
+};
+
+[NoDelete]
+interface PropagatorAc4{
+  void PropagatorAc4(InputSettings newSettings, [Ref] SizeRef newPossibilitySize, [Ref] SizeRef newOffset);
+};
+PropagatorAc4 implements Propagator;
+[NoDelete]
+interface PropagatorAc3{
+  void PropagatorAc3(InputSettings newSettings, [Ref] SizeRef newPossibilitySize, [Ref] SizeRef newOffset);
+};
+PropagatorAc4 implements Propagator;

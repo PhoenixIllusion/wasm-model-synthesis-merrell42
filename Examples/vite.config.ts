@@ -5,7 +5,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         format: 'esm',
-        dir: '../.git-pages/demo-raytrace/'
+        dir: '../.git-pages/demo-examples/'
       }
     },
     target: ['esnext']

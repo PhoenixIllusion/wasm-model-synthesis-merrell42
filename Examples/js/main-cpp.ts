@@ -1,10 +1,6 @@
-import { createInputSettings, getU32, setWASM } from '../../src/native-input';
-import { readXML } from '../../src/xml-util';
-import initWASM from './Merrel42ModelSynth.wasm';
-import Merrel42ModelSynth from '../../dist/Merrel42ModelSynth.wasm';
-import { getTileForLabel } from '../../src/parse-simpletiled';
-import { parseInput } from '../../src/parse-input';
-import { getOverlapTileForLabel } from '../../src/parse-overlapping';
+import initWASM from './Merrel42ModelSynth.wasm.js';
+import Merrel42ModelSynth from './Merrel42ModelSynth.wasm.js';
+import { readXML, SavePngData, LoadPngLookupR, makeStrW, XMLReader, LodePNG, IFStream, getU32, readImage, setWASM } from './example.js';
 
 const url = new URL(location.href);
 const query = (key) => {
@@ -19,7 +15,6 @@ const sRandSeed = query('seed') || 0;
 const info = await readXML(`samples.xml`);
 const entries = [...info.children];
 const sample = entries[sampleIndex];
-const sampleName = entries[sampleIndex].getAttribute('name')!;
 
 const sampleSelect: HTMLSelectElement = document.querySelector('#sample-select')!;
 entries.forEach((entry: Element, i: number) => {
@@ -42,30 +37,38 @@ entries.forEach((entry: Element, i: number) => {
   }
   sampleSelect.appendChild(option);
 });
-sampleSelect.onchange = () => location.href = 'index-js.html?sample=' + sampleSelect.value + '&seed=' + sRandSeed;
-
+sampleSelect.onchange = () => location.href = 'index.html?sample=' + sampleSelect.value + '&seed=' + sRandSeed;
+if (sample.tagName === 'simpletiled') {
+  await readXML(`samples/${entries[sampleIndex].getAttribute('name')}/data.xml`);
+}
+if (sample.tagName === 'overlapping') {
+  await readImage(`samples/${entries[sampleIndex].getAttribute('name')}.png`)
+}
 
 const createTile = (label: number): HTMLImageElement => {
   const img = new Image();
-  const tile = getTileForLabel(label);
-  const url = `samples/${sampleName}/${tile.path}.png`;
+  const test = / ?(\d)?\./.exec(LoadPngLookupR[label]!);
+  const version = (test && test[1]) || '0';
+  const url = LoadPngLookupR[label].replace(/ \d\./g, '.');
   img.src = url;
-  img.className += ' tile version-' + tile.version;
+  img.className += ' tile version-' + version;
   return img;
 }
 const drawTile = (ctx: CanvasRenderingContext2D, label: number, x: number, y: number): void => {
-  const imgData = getOverlapTileForLabel(label);
+  const imgData = SavePngData[label].data;
   ctx.putImageData(imgData, x, y);
 }
 
-initWASM().then(async function (module: typeof Merrel42ModelSynth) {
+initWASM({ XMLReader, IFStream, lodepng: LodePNG }).then(async function (module: typeof Merrel42ModelSynth) {
   setWASM(module);
 
+  module.Parser.prototype.readXML(makeStrW('samples.xml'));
   const timer = new module.Microseconds();
 
-  const settings = createInputSettings(await parseInput(sample, true));
+  const settings = module.Parser.prototype.parse(new module.XMLNode(XMLReader.getChildNodeN(1, sampleIndex)!), timer);
 
   module.Parser.prototype.setRandomSeed(sRandSeed);
+  settings.useAc4 = true;
   const synth = new module.Synthesizer(settings, timer);
 
   synth.synthesize(timer);
@@ -105,7 +108,7 @@ initWASM().then(async function (module: typeof Merrel42ModelSynth) {
   const logDiv = document.createElement('div');
   const log = `sRand SEED: ${sRandSeed}\nPropagator - ${settings.useAc4 ? 'AC4' : 'AC3'}\n
         SampleName: ${settings.name.c_str()}\nSize: ${width}x${height}x${depth}\n\n
-        TileCount: ${settings.numLabels}\nRuleCount: `;
+        TileCount: ${settings.numLabels}`;
   logDiv.innerText = log;
   document.body.appendChild(logDiv);
   console.log(settings.size.get(0), settings.size.get(1), settings.size.get(2))
