@@ -23,7 +23,7 @@ const sampleName = entries[sampleIndex].getAttribute('name')!;
 const sampleSelect: HTMLSelectElement = document.querySelector('#sample-select')!;
 entries.forEach((entry: Element, i: number) => {
   const option = document.createElement('option') as HTMLOptionElement;
-  option.value = ''+i;
+  option.value = '' + i;
   const a = x => entry.getAttribute(x);
   const [name, subset, width, height, periodic] = [
     'name', 'subset', 'width', 'height', 'periodic'
@@ -70,7 +70,7 @@ const run = async () => {
       resolve(ev.data);
     }
   });
-  const { width, height, depth, output } = data as { width: number, height: number, depth: number, output: ArrayBuffer  };
+  const { width, height, depth, output } = data as { width: number, height: number, depth: number, output: ArrayBuffer };
   const model = new Uint32Array(output);
 
   const renderGrid = document.getElementById('container') as HTMLDivElement;
@@ -78,7 +78,7 @@ const run = async () => {
   if (sample.tagName === 'simpletiled') {
     renderGrid.style.gridTemplateColumns = `repeat(${width},1fr)`;
   }
-  let ctx: CanvasRenderingContext2D|undefined = undefined;
+  let ctx: CanvasRenderingContext2D | undefined = undefined;
   if (sample.tagName === 'overlapping') {
     const canvas = document.createElement('canvas');
     renderGrid.appendChild(canvas);

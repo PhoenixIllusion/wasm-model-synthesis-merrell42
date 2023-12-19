@@ -7,28 +7,28 @@ export function setWASM(_module: typeof Merrel42ModelSynth) {
 
 export function createU32(size: number, value: number[]): number {
   const ref = module['_webidl_malloc'](size * 4);
-  module.HEAPU32.set(value, ref/4);
+  module.HEAPU32.set(value, ref / 4);
   return ref;
 }
 
-export function setU32(ref: number|any, value: number[]): void {
-  if(typeof ref == 'object') {
+export function setU32(ref: number | any, value: number[]): void {
+  if (typeof ref == 'object') {
     ref = module.getPointer(ref);
   }
-  module.HEAPU32.set(value, ref/4);
+  module.HEAPU32.set(value, ref / 4);
 }
-export function getU32(ref: number|any, len: number): Uint32Array {
-  if(typeof ref == 'object') {
+export function getU32(ref: number | any, len: number): Uint32Array {
+  if (typeof ref == 'object') {
     ref = module.getPointer(ref);
   }
-  return module.HEAPU32.subarray(ref/4, ref/4 + len);
+  return module.HEAPU32.subarray(ref / 4, ref / 4 + len);
 }
 
 
 export interface NativeInputSetting {
   seed: number;
-  size: [number,number,number];
-  blockSize: [number,number,number];
+  size: [number, number, number];
+  blockSize: [number, number, number];
   numDims: number;
   numLabels: number;
   useAc4: boolean;
@@ -44,11 +44,11 @@ export interface NativeInputSetting {
 
 export function createInputSettings(settings: NativeInputSetting): Merrel42ModelSynth.InputSettings {
   const inputSettings = new module.InputSettings();
-  settings.size.forEach((v,i) => 
-    inputSettings.size.set(v,i)
+  settings.size.forEach((v, i) =>
+    inputSettings.size.set(v, i)
   );
-  settings.blockSize.forEach((v,i) => 
-    inputSettings.blockSize.set(v,i)
+  settings.blockSize.forEach((v, i) =>
+    inputSettings.blockSize.set(v, i)
   );
   inputSettings.numDims = settings.numDims;
   inputSettings.numLabels = settings.numLabels;
@@ -57,16 +57,16 @@ export function createInputSettings(settings: NativeInputSetting): Merrel42Model
   inputSettings.ground = settings.ground;
 
   inputSettings.periodic = settings.periodic;
-  const transition  = new module.Transition(settings.numLabels);
-  settings.transition.forEach( (aLayer,layer) =>
-    aLayer.forEach((arrA, aIndex) => 
-      arrA.forEach((value, bIndex) => 
+  const transition = new module.Transition(settings.numLabels);
+  settings.transition.forEach((aLayer, layer) =>
+    aLayer.forEach((arrA, aIndex) =>
+      arrA.forEach((value, bIndex) =>
         transition.set(layer, aIndex, bIndex, value)
-  )));
+      )));
   inputSettings.transition = transition.ref();
 
   inputSettings.supporting.resize(0);
-  settings.supporting.forEach( i2 => {
+  settings.supporting.forEach(i2 => {
     const _vec2 = new module.Vector2Int();
     i2.forEach(i1 => {
       const _vec1 = new module.VectorInt();
@@ -79,16 +79,16 @@ export function createInputSettings(settings: NativeInputSetting): Merrel42Model
   });
 
   inputSettings.supportCount.resize(0);
-  settings.supportCount.forEach( i1 => {
-      const _vec1 = new module.VectorInt();
-      i1.forEach(i => {
-        _vec1.push_back(i);
-      });
-      inputSettings.supportCount.push_back(_vec1);
+  settings.supportCount.forEach(i1 => {
+    const _vec1 = new module.VectorInt();
+    i1.forEach(i => {
+      _vec1.push_back(i);
+    });
+    inputSettings.supportCount.push_back(_vec1);
   });
 
   inputSettings.weights.resize(0);
-  settings.weights.forEach(v => 
+  settings.weights.forEach(v =>
     inputSettings.weights.push_back(v)
   );
 

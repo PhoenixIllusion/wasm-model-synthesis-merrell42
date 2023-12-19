@@ -20,10 +20,10 @@ self.onmessage = async (e) => {
   const [width, height, depth] = getU32(inputSettings.size, 3);
 
   const output = new Uint32Array(width * height * depth);
-  for(let z=0;z<depth;z++)
-  for(let y=0;y<height;y++)
-  for(let x=0;x<width;x++)
-    output[x + y*width + z*width*height] = model.get(x,y,z);
+  for (let z = 0; z < depth; z++)
+    for (let y = 0; y < height; y++)
+      for (let x = 0; x < width; x++)
+        output[x + y * width + z * width * height] = model.get(x, y, z);
 
-    postMessage({width,height,depth, output: output.buffer}, {transfer: [output.buffer]});
+  postMessage({ width, height, depth, output: output.buffer }, { transfer: [output.buffer] });
 }
