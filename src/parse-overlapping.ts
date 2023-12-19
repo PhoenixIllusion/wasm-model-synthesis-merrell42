@@ -157,7 +157,7 @@ export async function parseOverlapping(node: Element, settings: ParsedInputHead,
 
   for (let y = 0; y < h0; y++) {
 		for (let x = 0; x < w0; x++) {
-			const data: Uint8ClampedArray = getPatch(x, y, w, h, N, image.data);
+			let data: Uint8ClampedArray = getPatch(x, y, w, h, N, image.data);
       const hash: string = hashPatch(data);
       const incPatch = (hash: string, data: Uint8ClampedArray) => {
         patches.set(hash, (patches.get(hash)||0)+1);
@@ -176,9 +176,9 @@ export async function parseOverlapping(node: Element, settings: ParsedInputHead,
 				} else {
           transform = rotatePatch;
 				}
-        const patch = transform(data, N);
-        const hash = hashPatch(patch);
-        incPatch(hash, patch);
+        data = transform(data, N);
+        const hash = hashPatch(data);
+        incPatch(hash, data);
 			}
 		}
 	}
