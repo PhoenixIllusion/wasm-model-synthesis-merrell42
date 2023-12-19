@@ -25,7 +25,7 @@ set(INTERPROCEDURAL_OPTIMIZATION OFF)
 set(GENERATE_DEBUG_SYMBOLS ON)
 
 set(third_party_patch
- # cp -r samples ${CMAKE_CURRENT_SOURCE_DIR}/Examples/ &&
+  cp -r samples ${CMAKE_CURRENT_SOURCE_DIR}/Examples/ &&
   git apply ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/ifstream_patch.patch &&
   cp ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/ifstream_.h src/parseInput/ &&
   cp ${CMAKE_CURRENT_SOURCE_DIR}/em-thirdparty-header/ifstream_.cpp src/parseInput/ &&
@@ -96,6 +96,7 @@ set(EMCC_ARGS
   -s EXPORT_ES6=1
   -s EXPORT_NAME="Merrel42ModelSynth"
   -s EXPORTED_RUNTIME_METHODS=['ccall']
+  -s ENVIRONMENT=web,worker
   -s MODULARIZE=1
   -s NO_EXIT_RUNTIME=1
   -s NO_FILESYSTEM=1

@@ -1,10 +1,9 @@
-import { createInputSettings, getU32, setWASM } from '../../src/native-input';
 import { readXML } from '../../src/xml-util';
-import initWASM from './Merrel42ModelSynth.wasm';
-import Merrel42ModelSynth from '../../dist/Merrel42ModelSynth.wasm';
 import { getTileForLabel } from '../../src/parse-simpletiled';
 import { parseInput } from '../../src/parse-input';
 import { getOverlapTileForLabel } from '../../src/parse-overlapping';
+
+import SynthesizerWorker from './synthesizer.worker?worker';
 
 const url = new URL(location.href);
 const query = (key) => {
@@ -42,7 +41,7 @@ entries.forEach((entry: Element, i: number) => {
   }
   sampleSelect.appendChild(option);
 });
-sampleSelect.onchange = () => location.href = 'index-js.html?sample=' + sampleSelect.value + '&seed=' + sRandSeed;
+sampleSelect.onchange = () => location.href = 'index.html?sample=' + sampleSelect.value + '&seed=' + sRandSeed;
 
 
 const createTile = (label: number): HTMLImageElement => {
@@ -58,20 +57,21 @@ const drawTile = (ctx: CanvasRenderingContext2D, label: number, x: number, y: nu
   ctx.putImageData(imgData, x, y);
 }
 
-initWASM().then(async function (module: typeof Merrel42ModelSynth) {
-  setWASM(module);
+const run = async () => {
 
-  const timer = new module.Microseconds();
-
-  const settings = createInputSettings(await parseInput(sample, true));
+  const settings = await parseInput(sample, true);
   const sampleName = sample.getAttribute('name')!;
+  settings.seed = sRandSeed;
 
-  const synth = new module.Synthesizer(settings, timer);
-
-  synth.synthesize(timer);
-
-  const model = new module.Model(synth.getModel());
-  const [width, height, depth] = getU32(settings.size, 3);
+  const worker = new SynthesizerWorker();
+  worker.postMessage(settings);
+  const data = await new Promise(resolve => {
+    worker.onmessage = (ev) => {
+      resolve(ev.data);
+    }
+  });
+  const { width, height, depth, output } = data as { width: number, height: number, depth: number, output: ArrayBuffer  };
+  const model = new Uint32Array(output);
 
   const renderGrid = document.getElementById('container') as HTMLDivElement;
   renderGrid.innerHTML = '';
@@ -93,7 +93,7 @@ initWASM().then(async function (module: typeof Merrel42ModelSynth) {
     for (let y = 0; y < height; y++) {
       let line = [];
       for (let x = 0; x < width; x++) {
-        const label = model.get(x, y, z);
+        const label = model[x + y * width + z * width * height];
         if (sample.tagName === 'simpletiled') {
           renderGrid.appendChild(createTile(label));
         }
@@ -108,5 +108,6 @@ initWASM().then(async function (module: typeof Merrel42ModelSynth) {
         TileCount: ${settings.numLabels} `;
   logDiv.innerText = log;
   document.body.appendChild(logDiv);
-  console.log(settings.size.get(0), settings.size.get(1), settings.size.get(2))
-});
+}
+
+run();

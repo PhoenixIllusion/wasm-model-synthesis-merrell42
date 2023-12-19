@@ -26,6 +26,7 @@ export function getU32(ref: number|any, len: number): Uint32Array {
 
 
 export interface NativeInputSetting {
+  seed: number;
   size: [number,number,number];
   blockSize: [number,number,number];
   numDims: number;
