@@ -34,6 +34,8 @@ declare module Merrel42ModelSynth {
         get(x: number): number;
         set(x: number, index: number): number;
     }
+    class IntPtr {
+    }
     class IntRef {
         get(x: number): number;
         set(x: number, index: number): number;
@@ -51,6 +53,7 @@ declare module Merrel42ModelSynth {
         resize(size: number): void;
     }
     class VectorInt {
+        constructor();
         push_back(val: number): void;
         data(): IntRef;
         get(x: number): number;
@@ -59,6 +62,7 @@ declare module Merrel42ModelSynth {
         resize(size: number): void;
     }
     class Vector2Int {
+        constructor();
         push_back(val: VectorInt): void;
         get(x: number): VectorInt;
         set(x: VectorInt, index: number): void;
@@ -109,6 +113,9 @@ declare module Merrel42ModelSynth {
         get_numLabels(): number;
         set_numLabels(numLabels: number): void;
         numLabels: number;
+        get_initialLabels(): IntPtr;
+        set_initialLabels(initialLabels: IntPtr): void;
+        initialLabels: IntPtr;
         get_transition(): TransitionRef;
         set_transition(transition: TransitionRef): void;
         transition: TransitionRef;

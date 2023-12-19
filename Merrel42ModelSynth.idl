@@ -16,6 +16,9 @@ interface CharRef {
   [Operator="[]"] long get(long x);
   [Operator=")[index]=("] long set(long x,long index);
 };
+interface IntPtr {
+
+};
 interface IntRef {
   [Operator="[]"] long get(long x);
   [Operator=")[index]=("] long set(long x,long index);
@@ -32,6 +35,7 @@ interface VectorFloat {
   long size(); void resize(long size);
 };
 interface VectorInt {
+  void VectorInt();
   void push_back(long val);
   [Value] IntRef data();
   [Operator="[]"] long get(long x);
@@ -39,6 +43,7 @@ interface VectorInt {
   long size(); void resize(long size);
 };
 interface Vector2Int {
+  void Vector2Int();
   void push_back([Ref] VectorInt val);
   [Value, Operator="[]"] VectorInt get(long x);
   [Operator=")[index]=("] void set([Ref] VectorInt x,long index);
@@ -75,7 +80,8 @@ interface InputSettings {
   [Value] readonly attribute SizeRef blockSize;
   [Value] attribute VectorFloat weights;
   attribute long numLabels;
-  [Value] attribute TransitionRef transition;
+  attribute IntPtr initialLabels;
+  attribute TransitionRef transition;
   [Value] attribute Vector3Int supporting;
   [Value] attribute Vector2Int supportCount;
   [Value] attribute CString tiledModelSuffix;
@@ -97,7 +103,7 @@ interface Transition {
   void Transition(long numLabels);
   void set(long layer, long aIndex, long bIndex, boolean val);
   boolean get(long layer, long aIndex, long bIndex);
-  [Value] TransitionRef ref();
+  TransitionRef ref();
   void remove();
 };
 

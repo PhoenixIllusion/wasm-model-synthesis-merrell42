@@ -16,12 +16,13 @@ using Microseconds = std::chrono::microseconds;
 using SizeRef = int[3];
 
 using IntRef = int *;
+using IntPtr = int;
 using FloatRef = float *;
 using CharRef = unsigned char *;
 using WCharRef = wchar_t;
 
 using ModelRef = int***;
-using TransitionRef = bool***;
+using TransitionRef = bool**;
 
 using VectorFloat = vector<float>;
 
@@ -41,7 +42,7 @@ class Transition {
       _numLabels = numLabels;
       _transition = createTransition(numLabels);
     }
-    TransitionRef ref() { return _transition;}
+    TransitionRef* ref() { return _transition;}
 
     void set(int layer, int aIndex, int bIndex, bool val) {
       _transition[layer][aIndex][bIndex] = val;

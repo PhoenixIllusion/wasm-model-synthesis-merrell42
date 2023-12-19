@@ -95,7 +95,7 @@ set(EMCC_ARGS
   -s ENVIRONMENT='web,node'
   -s EXPORT_ES6=1
   -s EXPORT_NAME="Merrel42ModelSynth"
-  -s EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']
+  -s EXPORTED_RUNTIME_METHODS=['ccall']
   -s MODULARIZE=1
   -s NO_EXIT_RUNTIME=1
   -s NO_FILESYSTEM=1

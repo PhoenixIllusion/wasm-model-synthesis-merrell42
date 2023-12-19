@@ -54,8 +54,8 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-cp ./dist/Merrel42ModelSynth.wasm.js ./Examples/js/Merrel42ModelSynth.wasm.js
-cp ./dist/Merrel42ModelSynth.wasm.wasm ./Examples/js/Merrel42ModelSynth.wasm.wasm
+cp ./dist/Merrel42ModelSynth.wasm.* ./Examples/js/
+cp ./dist/types.d.ts ./Examples/js/
 if [ $? -ne 0 ]; then
 	exit 1
 fi
