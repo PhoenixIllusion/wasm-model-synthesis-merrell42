@@ -13,5 +13,8 @@
     "vite": "4.5.0"
   },
   "type": "module",
-  "dependencies": {}
+  "dependencies": {
+    "@types/three": "0.159.0",
+    "three": "0.159.0"
+  }
 }

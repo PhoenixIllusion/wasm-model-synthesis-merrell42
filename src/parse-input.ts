@@ -54,7 +54,7 @@ export const parseInputHead = (node: Element): ParsedInputHead => {
 		console.error("Periodic not implemented when modifying in blocks.");
 	}
 	const type = node.tagName;
-	const numDims = (type === 'tilemodel') ? 3 : 2;
+	const numDims = (type === 'tiledmodel') ? 3 : 2;
 	let ground = -1;
 	if (type === 'overlapping') {
 		const hasGround = _parseInt(node, 'ground', 1234) !== 1234;

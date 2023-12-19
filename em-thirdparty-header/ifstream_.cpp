@@ -1,15 +1,15 @@
 #include "ifstream_.h"
 
-EM_JS(int, __ifstream_constructor, (const char *path, char flag), {
+EM_JS(int, __ifstream_constructor, (const std::string *filename, char flag), {
     const method = Module['IFStream']['constructor'];
-    return method(path, flag);
+    return method(filename, flag);
 });
 EM_JS(bool, __ifstream_exists, (const char *path), {
     const method = Module['IFStream']['exists'];
     return method(path);
 });
 
-EM_JS(void, __ifstream_getline, (int id, char * buffer, int len), {
+EM_JS(void, __ifstream_getline, (int id, void * buffer, int len), {
     const method = Module['IFStream']['getline'];
     return method(id, buffer, len);
 });
@@ -26,7 +26,11 @@ EM_JS(std::string *, __ifstream_rdbuf, (int id), {
 
 
 ifstream_::ifstream_(std::string path, char flags) {
-    id = __ifstream_constructor(path.c_str(), flags);
+    id = __ifstream_constructor(&path, flags);
+}
+
+ifstream_::operator bool() {
+      return id >= 0;
 }
 
 bool ifstream_::exists(const char * path) {

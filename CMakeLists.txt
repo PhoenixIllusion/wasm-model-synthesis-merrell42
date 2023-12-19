@@ -6,6 +6,7 @@ set(PYTHON ${Python3_EXECUTABLE} CACHE STRING "Python path")
 set(EMSCRIPTEN_ROOT $ENV{EMSDK}/upstream/emscripten CACHE STRING "Emscripten path")
 set(CMAKE_TOOLCHAIN_FILE ${EMSCRIPTEN_ROOT}/cmake/Modules/Platform/Emscripten.cmake)
 set(WEBIDL_BINDER_SCRIPT ${EMSCRIPTEN_ROOT}/tools/webidl_binder.py)
+set(WEBIDL_GLUE_EXTRA ${CMAKE_CURRENT_SOURCE_DIR}/glue-extra.js)
 set(MODEL_SYNTH_FRONT_MATTER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/front-matter.js)
 set(MODEL_SYNTH_HEADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Merrel42ModelSynth.h)
 set(MODEL_SYNTH_IDL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Merrel42ModelSynth.idl)
@@ -174,7 +175,8 @@ add_custom_command(
   OUTPUT glue.cpp glue.js
   BYPRODUCTS parser.out WebIDLGrammar.pkl
   COMMAND ${PYTHON} ${WEBIDL_BINDER_SCRIPT} ${MODEL_SYNTH_IDL_FILE} glue
-  DEPENDS ${MODEL_SYNTH_IDL_FILE}
+  COMMAND cat ${WEBIDL_GLUE_EXTRA} >> glue.js
+  DEPENDS ${MODEL_SYNTH_IDL_FILE} ${WEBIDL_GLUE_EXTRA}
   COMMENT "Generating Merrel42ModelSynth.js bindings"
   VERBATIM)
 add_custom_command(

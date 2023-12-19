@@ -76,8 +76,11 @@ class Parser {
   InputSettings* parse(const XMLNode& node, std::chrono::microseconds& inputTime) {
     return parseInput(node, inputTime);
   }
-  void setRandomSeed(int seed) {
+};
+
+class Random {
+  public:
+  static void setRandomSeed(int seed) {
     srand(seed);
   }
 };
-

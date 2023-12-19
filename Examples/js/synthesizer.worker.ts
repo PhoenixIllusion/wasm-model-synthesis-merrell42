@@ -7,7 +7,7 @@ self.onmessage = async (e) => {
   const settings = e.data as NativeInputSetting;
   const module = await Merrel42ModelSynth();
   setWASM(module);
-  module.Parser.prototype.setRandomSeed(settings.seed);
+  module.Random.setRandomSeed(settings.seed);
   const timer = new module.Microseconds();
 
   const inputSettings = createInputSettings(settings);

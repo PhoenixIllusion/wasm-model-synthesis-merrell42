@@ -1,0 +1,1 @@
+Random['setRandomSeed'] = Random.prototype['setRandomSeed'];

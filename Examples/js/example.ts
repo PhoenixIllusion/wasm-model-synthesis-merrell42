@@ -62,6 +62,9 @@ const parser = new DOMParser();
 const docCache: {
   [key: string]: Element
 } = {}
+export function registerXMLDoc(node: Element): number {
+  return addNode(node);
+}
 export const readXML = (path: string): Promise<Element> | Element => {
   if (docCache[path]) {
     return docCache[path];
@@ -156,22 +159,50 @@ export const XMLReader = {
   }
 }
 
-const streamLookup = {};
+const streamData: {[key: string]: string} = {};
+export const readText = (url: string): Promise<string>|string => {
+  if(streamData[url]) {
+    return streamData[url];
+  }
+  return fetch(url).then(res => res.text()).then(text => {
+    streamData[url] = text;
+    return text;
+  })
+}
+
+const streamLookup: {[key: number]: { data: string, tokenRegex: RegExp, lineRegex: RegExp }} = {};
 let streamId = 1;
 export const IFStream = {
   constructor: (url: string, _flag: number) => {
-    url = getStr(url as any as number);
-    debugger;
+    url = module.wrapPointer(url as any as number, module.CString).c_str();
+    const id = streamId++;
+    streamLookup[id] = { data: readText(url) as string, tokenRegex: (/\w+/g), lineRegex: (/[\n\r]/g) }
+    return id;
   },
   exists: (url: string): boolean => {
-    url = getStr(url as any as number);
     return true;
   },
-  getline: (_id: number, _buffer: Merrel42ModelSynth.CharRef, _len: number) => {
-    debugger;
+  readInt: (_id: number): number => {
+    const data = streamLookup[_id]!;
+    const startIndex = data.tokenRegex.lastIndex;
+    data.tokenRegex.exec(data.data);
+    data.lineRegex.lastIndex = data.tokenRegex.lastIndex;
+    const token = data.data.substring(startIndex, data.tokenRegex.lastIndex);
+    return parseInt(token);
+  },
+  getline: (_id: number, _buffer: number, _len: number): void => {
+    const data = streamLookup[_id]!;
+    const startIndex = data.lineRegex.lastIndex;
+    data.lineRegex.exec(data.data);
+    data.tokenRegex.lastIndex = data.lineRegex.lastIndex;
+    const line = data.data.substring(startIndex, data.lineRegex.lastIndex);
+    const buf = encoder.encode(line);
+    const arr = module.HEAPU8.subarray(_buffer, _buffer + _len);
+    arr.set(buf);
   },
   rdbuf: (_id: number) => {
-    debugger;
+    const data = streamLookup[_id]!;
+    return makeCString(data.data.substring(data.lineRegex.lastIndex))
   }
 }
 

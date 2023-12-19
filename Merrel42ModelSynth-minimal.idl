@@ -75,6 +75,10 @@ interface InputSettings {
   attribute long ground;
 };
 
+interface Random {
+  static void setRandomSeed(long seed);
+};
+
 interface Transition {
   void Transition(long numLabels);
   void set(long layer, long aIndex, long bIndex, boolean val);

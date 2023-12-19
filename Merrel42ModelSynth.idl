@@ -127,6 +127,9 @@ interface WCharRef {
 interface Parser {
   static XMLNode readXML([Const] WCharRef filename, [Const] optional WCharRef tag);
   static InputSettings parse([Const, Ref] XMLNode node, [Ref] Microseconds inputTime);
+};
+
+interface Random {
   static void setRandomSeed(long seed);
 };
 

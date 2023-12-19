@@ -12,9 +12,7 @@ class ifstream_ {
     }
 		void getline(char * buffer, int len);
 
-    bool operator!() {
-      return id != -1;
-    }
+    explicit operator bool();
     static bool exists(const char * path);
     void operator >> (int &i);
     std::string rdbuf();
