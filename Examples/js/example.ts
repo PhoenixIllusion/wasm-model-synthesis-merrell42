@@ -35,21 +35,15 @@ export function makeStrW(str: string): number {
   return ref;
 }
 function makeRawString(str: string): number {
-  return module.getPointer(new module.CString(str, str.length).c_str());
-}
-
-function createU32(size: number, value: number[]): number {
-  const ref = module['_webidl_malloc'](size * 4);
-  module.HEAPU32.set(value, ref / 4);
+  const bytes = encoder.encode(str);
+  const ref = module['_webidl_malloc'](bytes.length + 1);
+  const arr = module.HEAPU8.subarray(ref, ref + bytes.length);
+  for (let i = 0; i < str.length; i++) {
+    arr[i] = bytes[i];
+  }
   return ref;
 }
 
-function setU32(ref: number | any, value: number[]): void {
-  if (typeof ref == 'object') {
-    ref = module.getPointer(ref);
-  }
-  module.HEAPU32.set(value, ref / 4);
-}
 export function getU32(ref: number | any, len: number): Uint32Array {
   if (typeof ref == 'object') {
     ref = module.getPointer(ref);
@@ -170,39 +164,14 @@ export const readText = (url: string): Promise<string>|string => {
   })
 }
 
-const streamLookup: {[key: number]: { data: string, tokenRegex: RegExp, lineRegex: RegExp }} = {};
-let streamId = 1;
 export const IFStream = {
   constructor: (url: string, _flag: number) => {
     url = module.wrapPointer(url as any as number, module.CString).c_str();
-    const id = streamId++;
-    streamLookup[id] = { data: readText(url) as string, tokenRegex: (/\w+/g), lineRegex: (/[\n\r]/g) }
-    return id;
+    const str = readText(url) as string;
+    return makeRawString(str);
   },
   exists: (url: string): boolean => {
     return true;
-  },
-  readInt: (_id: number): number => {
-    const data = streamLookup[_id]!;
-    const startIndex = data.tokenRegex.lastIndex;
-    data.tokenRegex.exec(data.data);
-    data.lineRegex.lastIndex = data.tokenRegex.lastIndex;
-    const token = data.data.substring(startIndex, data.tokenRegex.lastIndex);
-    return parseInt(token);
-  },
-  getline: (_id: number, _buffer: number, _len: number): void => {
-    const data = streamLookup[_id]!;
-    const startIndex = data.lineRegex.lastIndex;
-    data.lineRegex.exec(data.data);
-    data.tokenRegex.lastIndex = data.lineRegex.lastIndex;
-    const line = data.data.substring(startIndex, data.lineRegex.lastIndex);
-    const buf = encoder.encode(line);
-    const arr = module.HEAPU8.subarray(_buffer, _buffer + _len);
-    arr.set(buf);
-  },
-  rdbuf: (_id: number) => {
-    const data = streamLookup[_id]!;
-    return makeCString(data.data.substring(data.lineRegex.lastIndex))
   }
 }
 
