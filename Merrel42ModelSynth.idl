@@ -144,10 +144,20 @@ interface Propagator {
 [NoDelete]
 interface PropagatorAc4{
   void PropagatorAc4(InputSettings newSettings, [Ref] SizeRef newPossibilitySize, [Ref] SizeRef newOffset);
+  boolean setBlockLabel(long label, [Ref] SizeRef position);
+  boolean removeLabel(long label, [Ref] SizeRef position);
+  void resetBlock();
+  boolean isPossible(long x, long y, long z, long label);
+  long pickLabel(long x, long y, long z);
 };
 PropagatorAc4 implements Propagator;
 [NoDelete]
 interface PropagatorAc3{
   void PropagatorAc3(InputSettings newSettings, [Ref] SizeRef newPossibilitySize, [Ref] SizeRef newOffset);
+  boolean setBlockLabel(long label, [Ref] SizeRef position);
+  boolean removeLabel(long label, [Ref] SizeRef position);
+  void resetBlock();
+  boolean isPossible(long x, long y, long z, long label);
+  long pickLabel(long x, long y, long z);
 };
 PropagatorAc4 implements Propagator;

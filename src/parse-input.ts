@@ -143,7 +143,7 @@ export const parseInput = async (node: Element, useAc4: boolean): Promise<Native
 		const subset = node.getAttribute("subset");
 		const base = await parseSimpleTiled(node, head, { name, subset });
 		return {
-			...head, ...base, ...computeSupport(base.transition, base.numLabels, head.numDims), useAc4
+			...head, ...base, ...computeSupport(base.transition, base.numLabels, head.numDims), useAc4, seed: 0
 		}
 	} else if (head.type === 'overlapping') {
 		const N = _parseInt(node, "N", 0);
@@ -151,12 +151,12 @@ export const parseInput = async (node: Element, useAc4: boolean): Promise<Native
 		const symmetry = _parseInt(node, "symmetry", 8);
 		const base = await parseOverlapping(node, head, { name, N, periodicInput, symmetry });
 		return {
-			...head, ...base, ...computeSupport(base.transition, base.numLabels, head.numDims), useAc4
+			...head, ...base, ...computeSupport(base.transition, base.numLabels, head.numDims), useAc4, seed: 0
 		}
 	} else if (head.type === 'tiledmodel') {
 		const base = await parseTiledModel(node, head, { name });
 		return {
-			...head, ...base, ...computeSupport(base.transition, base.numLabels, head.numDims), useAc4
+			...head, ...base, ...computeSupport(base.transition, base.numLabels, head.numDims), useAc4, seed: 0
 		}
 	}
 	throw new Error('Unable to handle type: ' + head.type)
