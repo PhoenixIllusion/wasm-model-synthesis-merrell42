@@ -1,5 +1,5 @@
-import initWASM from './Merrel42ModelSynth.wasm.js';
-import Merrel42ModelSynth from './Merrel42ModelSynth.wasm.js';
+import initWASM from './lib/wasm/Merrel42ModelSynth.wasm.js';
+import Merrel42ModelSynth from './lib/wasm/Merrel42ModelSynth.wasm.js';
 import { readXML, SavePngData, LoadPngLookupR, makeStrW, XMLReader, LodePNG, IFStream, getU32, readImage, setWASM, readText, registerXMLDoc } from './example.js';
 import { ModelType, OverlappingRender, SimpleTileRender, TiledModelRender } from './render.js';
 import { populateDropdown, query } from './setup.js';

@@ -167,7 +167,7 @@ class PropagatorConfig {
   constructor(
     public size: Size, public possibilitySize: Size, public offset: Size,
     public numLabels: i32, public numDims: u8 = 0, public periodic: boolean = false) {
-    this.transition = changetype<ArrBoolean>(heap.alloc(possibilitySize.xyz * 6));
+    this.transition = changetype<ArrBoolean>(heap.alloc(numLabels * numLabels * 3));
     this.weights = changetype<ArrF32>(heap.alloc(numLabels * 4));
   }
 
