@@ -1,7 +1,7 @@
-import { readXML } from '../../src/xml-util';
-import { getTileForLabel } from '../../src/parse-simpletiled';
-import { parseInput } from '../../src/parse-input';
-import { getOverlapTileForLabel } from '../../src/parse-overlapping';
+import { readXML } from './lib/xml-util';
+import { getTileForLabel } from './lib/parse-simpletiled';
+import { parseInput } from './lib/parse-input';
+import { getOverlapTileForLabel } from './lib/parse-overlapping';
 
 import SynthesizerWorker from './synthesizer.worker?worker';
 import { ModelType, OverlappingRender, SimpleTileRender, TiledModelRender } from './render';
@@ -24,6 +24,7 @@ const getImageDataForLabel = (label: number): ImageData => {
 const run = async () => {
 
   const settings = await parseInput(sample, true);
+  settings.useAc4 = false;
   settings.seed = sRandSeed;
 
   const worker = new SynthesizerWorker();

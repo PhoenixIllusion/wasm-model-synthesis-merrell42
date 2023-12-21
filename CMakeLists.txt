@@ -111,7 +111,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 		-s ASSERTIONS)
 else()
 	set(EMCC_ARGS 
-		${EMCC_ARGS} 
+		${EMCC_ARGS} -s ASSERTIONS
 		-O3)
 endif()
 

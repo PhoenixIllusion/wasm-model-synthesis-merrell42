@@ -7,6 +7,9 @@ export interface OverlappingConfig {
 	symmetry: number
 }
 
+const IndexDataClass = Uint16Array
+type IndexDataSize = Uint16Array;
+
 let canvas: OffscreenCanvas;
 let offscreenCanvas2D: OffscreenCanvasRenderingContext2D;
 
@@ -14,20 +17,20 @@ let offscreenCanvas2D: OffscreenCanvasRenderingContext2D;
 function rgba(x: number, y: number, N: number): number {
 	return 4 * (x + y * N);
 }
+function idx(x: number, y: number, N: number): number {
+	return (x + y * N);
+}
 
 // Get the patch at the given position.
-function getPatch(x0: number, y0: number, w: number, h: number, N: number, image: Uint8ClampedArray) {
-	const patch: Uint8ClampedArray = new Uint8ClampedArray(N * N * 4);
+function getPatch(x0: number, y0: number, w: number, h: number, N: number, image: IndexDataSize) {
+	const patch: IndexDataSize = new IndexDataClass(N * N);
 	let i = 0;
 	for (let dy = 0; dy < N; dy++) {
 		const y = (y0 + dy) % h;
 		for (let dx = 0; dx < N; dx++) {
 			const x = (x0 + dx) % w;
-			const xy = rgba(x, y, w);
-			for (let k = 0; k < 3; k++) {
-				patch[i++] = (image[xy + k]);
-			}
-			patch[i++] = 255;
+			const xy = idx(x, y, w);
+			patch[i++] = image[xy];
 		}
 	}
 	return patch;
@@ -35,45 +38,39 @@ function getPatch(x0: number, y0: number, w: number, h: number, N: number, image
 
 
 // Reflect a patch horizontally.
-function reflectPatch(patch: Uint8ClampedArray, N: number): Uint8ClampedArray {
-	const newPatch: Uint8ClampedArray = new Uint8ClampedArray(patch.length);
+function reflectPatch(patch: IndexDataSize, N: number): IndexDataSize {
+	const newPatch: IndexDataSize = new IndexDataClass(patch.length);
 	let i = 0;
 	for (let y = 0; y < N; y++) {
 		for (let x = 0; x < N; x++) {
-			const xy = rgba(N - 1 - x, y, N);
-			for (let k = 0; k < 4; k++) {
-				newPatch[i++] = (patch[xy + k]);
-			}
+			const xy = idx(N - 1 - x, y, N);
+			newPatch[i++] = patch[xy];
 		}
 	}
 	return newPatch;
 }
 
 // Rotate a patch 90 degrees.
-function rotatePatch(patch: Uint8ClampedArray, N: number): Uint8ClampedArray {
-	const newPatch: Uint8ClampedArray = new Uint8ClampedArray(patch.length);
+function rotatePatch(patch: IndexDataSize, N: number): IndexDataSize {
+	const newPatch: IndexDataSize = new IndexDataClass(patch.length);
 	let i = 0;
 	for (let y = 0; y < N; y++) {
 		for (let x = 0; x < N; x++) {
-			const xy = rgba(N - 1 - y, x, N);
-			for (let k = 0; k < 4; k++) {
-				newPatch[i++] = (patch[xy + k]);
-			}
+			const xy = idx(N - 1 - y, x, N);
+			newPatch[i++] = patch[xy];
 		}
 	}
 	return newPatch;
 }
 
 // Returns true if patch B is matches patch A shifted horizontally one pixel.
-function patchesMatchX(a: Uint8ClampedArray, b: Uint8ClampedArray, N: number): boolean {
+function patchesMatchX(a: IndexDataSize, b: IndexDataSize, N: number): boolean {
 	for (let y = 0; y < N; y++) {
 		for (let x = 0; x < N - 1; x++) {
-			const xyA = rgba(x + 1, y, N);
-			const xyB = rgba(x, y, N);
-			for (let k = 0; k < 3; k++) {
-				if (a[xyA + k] != b[xyB + k]) {
-					return false;
-				}
+			const xyA = idx(x + 1, y, N);
+			const xyB = idx(x, y, N);
+			if (a[xyA] != b[xyB]) {
+				return false;
 			}
 		}
 	}
@@ -81,15 +78,13 @@ function patchesMatchX(a: Uint8ClampedArray, b: Uint8ClampedArray, N: number): b
 }
 
 // Returns true if patch B is matches patch A shifted vertically one pixel.
-function patchesMatchY(a: Uint8ClampedArray, b: Uint8ClampedArray, N: number): boolean {
+function patchesMatchY(a: IndexDataSize, b: IndexDataSize, N: number): boolean {
 	for (let y = 0; y < N - 1; y++) {
 		for (let x = 0; x < N; x++) {
-			const xyA = rgba(x, y + 1, N);
-			const xyB = rgba(x, y, N);
-			for (let k = 0; k < 3; k++) {
-				if (a[xyA + k] != b[xyB + k]) {
-					return false;
-				}
+			const xyA = idx(x, y + 1, N);
+			const xyB = idx(x, y, N);
+			if (a[xyA] != b[xyB]) {
+				return false;
 			}
 		}
 	}
@@ -112,22 +107,42 @@ export const readImage = (path: string): ImageData | Promise<ImageData> => {
 		};
 	})
 }
+type IndexedImageData = { data: IndexDataSize, index: Uint32Array, width: number, height: number};
+const indexImage = (imageData: ImageData): IndexedImageData => {
+	const indexSet = new Set<number>();
+	const data = new Uint32Array(imageData.data.buffer);
+	data.forEach(rgba => 
+		indexSet.add(rgba)
+	)
+	const index = new Uint32Array([... indexSet.keys()].sort());
+	const indexedData = new IndexDataClass([...data].map(key => index.indexOf(key)));
+	return {
+		index,
+		data: indexedData,
+		width: imageData.width,
+		height: imageData.height
+	}
+}
 
 const tileLookup: { [label: number]: ImageData } = {};
 export function getOverlapTileForLabel(label: number): ImageData {
 	return tileLookup[label];
 }
-function addTileForLabel(label: number, data: Uint8ClampedArray, w: number, h: number): void {
-	tileLookup[label] = new ImageData(data, w, h)
+function addTileForLabel(label: number, data: IndexDataSize, index: Uint32Array, w: number, h: number): void {
+	const imgData = new Uint32Array(data.length);
+	data.forEach((v,i) => {
+		imgData[i] = index[v];
+	});
+	tileLookup[label] = new ImageData(new Uint8ClampedArray(imgData.buffer), w, h)
 }
 
-function hashPatch(data: Uint8ClampedArray): string {
-	return [...data].map((x, i) => ((i + 1) % 4 > 0) ? ('00' + x.toString(16)).substr(-2) : '').join('');
+function hashPatch(data: IndexDataSize): string {
+	return [...data].map((x, i) => ('00' + x.toString(16)).substr(-2)).join('');
 }
 
 export async function parseOverlapping(node: Element, settings: ParsedInputHead, config: OverlappingConfig): Promise<ParsedInputBase> {
 	const image = await readImage(`samples/${config.name}.png`);
-
+	const indexedImage = indexImage(image);
 	// Default size is 48 x 48.
 	if (settings.size[0] == 0) {
 		settings.size[0] = 48;
@@ -142,7 +157,7 @@ export async function parseOverlapping(node: Element, settings: ParsedInputHead,
 
 	// Maps from a N x N RGB patch to the number of times the patch appears.
 	const patches: Map<string, number> = new Map();
-	const patchesData: Map<string, Uint8ClampedArray> = new Map();
+	const patchesData: Map<string, IndexDataSize> = new Map();
 
 	// Indicates if a patch could be the ground patch.
 	const possiblyGround: Map<string, boolean> = new Map();
@@ -157,9 +172,9 @@ export async function parseOverlapping(node: Element, settings: ParsedInputHead,
 
 	for (let y = 0; y < h0; y++) {
 		for (let x = 0; x < w0; x++) {
-			let data: Uint8ClampedArray = getPatch(x, y, w, h, N, image.data);
+			let data: IndexDataSize = getPatch(x, y, w, h, N, indexedImage.data);
 			const hash: string = hashPatch(data);
-			const incPatch = (hash: string, data: Uint8ClampedArray) => {
+			const incPatch = (hash: string, data: IndexDataSize) => {
 				patches.set(hash, (patches.get(hash) || 0) + 1);
 				patchesData.set(hash, data);
 			}
@@ -170,7 +185,7 @@ export async function parseOverlapping(node: Element, settings: ParsedInputHead,
 			incPatch(hash, data);
 			// Reflect and rotate the patches depending on the symmetry.
 			for (let i = 1; i < config.symmetry; i++) {
-				let transform: (data: Uint8ClampedArray, dir: number) => Uint8ClampedArray;
+				let transform: (data: IndexDataSize, dir: number) => IndexDataSize;
 				if (i % 2 == 1) {
 					transform = reflectPatch;
 				} else {
@@ -193,7 +208,7 @@ export async function parseOverlapping(node: Element, settings: ParsedInputHead,
 	let label = 0;
 	ordredMap.forEach((count, hash) => {
 		weights.push(count);
-		addTileForLabel(label++, patchesData.get(hash)!, N, N);
+		addTileForLabel(label++, patchesData.get(hash)!, indexedImage.index, N, N);
 	});
 	const numLabels = weights.length;
 	// Compute the transitions.

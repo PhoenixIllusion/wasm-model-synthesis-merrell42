@@ -40,3 +40,15 @@ index 03b2d68..a468bd5 100644
  	if (!modelFile) {
  		cout << "ERROR: The model file :" << path << " does not exist.\n" << endl;
  		return;
+diff --git a/src/propagator/PropagatorAc3.cpp b/src/propagator/PropagatorAc3.cpp
+index 2bac346..04851af 100644
+--- a/src/propagator/PropagatorAc3.cpp
++++ b/src/propagator/PropagatorAc3.cpp
+@@ -188,6 +188,7 @@ void PropagatorAc3::propagate(int xB, int yB, int zB, int dir, std::deque<int*>&
+ 					posA[1] = yA;
+ 					posA[2] = zA;
+ 					updateQueue.push_back(posA);
++					inQueue[xA][yA][zA] = true;
+ 				}
+ 			}
+ 		}

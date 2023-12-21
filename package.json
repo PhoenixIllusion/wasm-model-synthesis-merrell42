@@ -4,7 +4,9 @@
   "description": "Port of https://github.com/merrell42/model-synthesis to use WASM",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "asbuild:debug": "asc assembly/index.ts --target debug",
+    "asbuild:release": "asc assembly/index.ts --target release",
+    "asbuild": "npm run asbuild:debug && npm run asbuild:release"
   },
   "repository": {
     "type": "git",
@@ -23,7 +25,10 @@
     "url": "https://github.com/PhoenixIllusion/wasm-model-synthesis-merrell42/issues"
   },
   "homepage": "https://github.com/PhoenixIllusion/wasm-model-synthesis-merrell42#readme",
-  "dependencies": {
+  "type": "module",
+  "devDependencies": {
+    "assemblyscript": "0.27.22",
     "typescript": "5.3.3"
-  }
+  },
+  "dependencies": {}
 }

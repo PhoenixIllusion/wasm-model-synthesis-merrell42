@@ -1,18 +1,12 @@
-import Merrel42ModelSynth from './Merrel42ModelSynth.wasm'
-import { NativeInputSetting, createInputSettings, getU32 } from '../../src/native-input'
-import { Synthesizer, setWASM } from '../../src/synthesizer';
-
+import { NativeInputSetting } from './lib/native-input'
+import { Synthesizer } from './lib/synthesizer';
 
 
 self.onmessage = async (e) => {
   const settings = e.data as NativeInputSetting;
-  const module = await Merrel42ModelSynth();
-  setWASM(module);
-  module.Random.setRandomSeed(settings.seed);
-
   const synth = new Synthesizer(settings);
 
-  synth.synthesize();
+  await synth.synthesize();
   
   const [width, height, depth] = settings.size;
   const output = synth.getModel();

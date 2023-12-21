@@ -40,7 +40,7 @@ initWASM({ XMLReader, IFStream, lodepng: LodePNG }).then(async function (module:
   const settings = module.Parser.prototype.parse(new module.XMLNode(sampleEntry), timer);
 
   module.Random.setRandomSeed(sRandSeed);
-  settings.useAc4 = true;
+  settings.useAc4 = false;
   const synth = new module.Synthesizer(settings, timer);
 
   synth.synthesize(timer);

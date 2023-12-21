@@ -1,4 +1,4 @@
-import Merrel42ModelSynth from '../dist/Merrel42ModelSynth.wasm'
+import Merrel42ModelSynth from './wasm/Merrel42ModelSynth.wasm'
 let module!: typeof Merrel42ModelSynth;
 
 export function setWASM(_module: typeof Merrel42ModelSynth) {

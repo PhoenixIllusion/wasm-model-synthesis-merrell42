@@ -1,4 +1,4 @@
-import { readXML } from "../../src/xml-util";
+import { readXML } from "./lib/xml-util";
 
 const url = new URL(location.href);
 export const query = (key) => {

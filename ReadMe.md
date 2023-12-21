@@ -21,7 +21,7 @@ Support parsing of SimpleTiled, Overlapping, and TiledModel.
 #### Emscripten Parser - Main-CPP.TS & Example.TS
 - Has minimal port of reading XML files using browser DOM Parser.
 - Has stubs for capturing a loaded image data. Fake data returned for simpletiled since algorithms do not use actual image-data during setup
-- Minimal IFStream code. Likely this IFStream is cause for failing during non-debug builds.
+- GIT Patches usage of filestream to string-stream subclass, simple JS layer to just return block of memory of file contents
 
 Without configuring and building with Asyncify, CPP parser relies on pre-loading any data to XML, IFStream, and LodePNG prior to execution, since non-asyncify emscripten will not wait for file IO, expecting on-demand data.
 

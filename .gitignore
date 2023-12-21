@@ -1,6 +1,5 @@
 /Build
 /dist
-/Examples/js/*.wasm.*
-/Examples/js/*.d.ts
+/Examples/js/lib/wasm/
 /Examples/samples
 node_modules
