@@ -2,8 +2,11 @@
 import type Merrel42ModelSynth from './wasm/Merrel42ModelSynth.wasm'
 import { NativeInputSetting, createInputSettings, setWASM as setInputWasm } from './native-input';
 import { Propagator } from './propagator';
+import { Debug } from './debug-propagator';
 
 type Int3 = [number, number, number];
+
+const cppDebug = new Debug();
 
 export class CppPropagator implements Propagator {
 
@@ -27,7 +30,6 @@ export class CppPropagator implements Propagator {
       this.propagator = new module.PropagatorAc4(newSettings, _possibilitySize, _offset);
     } else {
       this.propagator = new module.PropagatorAc3(newSettings, _possibilitySize, _offset);
-      this.updatePossibleLabels(0x10f8f8);
     }
     const ptr = this.createU32(3, possibilitySize);
     this._tmpInt3 = this.getU32(ptr, 3);
@@ -35,7 +37,9 @@ export class CppPropagator implements Propagator {
   }
   static async create(settings: NativeInputSetting, offset: Int3, possibilitySize: Int3): Promise<CppPropagator> {
     const module = await import('./wasm/Merrel42ModelSynth.wasm');
-    return new CppPropagator(await module.default(), settings, offset, possibilitySize);
+    const merrel = await module.default({Debug: cppDebug});
+    cppDebug.setHeaps(merrel);
+    return new CppPropagator(merrel, settings, offset, possibilitySize);
   }
 
   setBlockLabel(label: number, pos: [number, number, number]) {
@@ -58,21 +62,8 @@ export class CppPropagator implements Propagator {
     this.propagator.resetBlock();
   }
 
-  possibleLabels: Uint8Array[][][] = []
-  updatePossibleLabels(address: number) {
-    this.possibleLabels = [];
-    const xPtrs = this.module.HEAPU32.subarray(address/4, address/4+this.possibilitySize[0]);
-    xPtrs.forEach((addrX,x) => {
-      this.possibleLabels[x] = [];
-      const yPtrs = this.module.HEAPU32.subarray(addrX/4, addrX/4 + this.possibilitySize[1]);
-      yPtrs.forEach((addrY,y) => {
-        this.possibleLabels[x][y] = [];
-        const zPtrs = this.module.HEAPU32.subarray(addrY/4, addrY/4 + this.possibilitySize[2]);
-        zPtrs.forEach((addrZ,z) => {
-          this.possibleLabels[x][y][z] = this.module.HEAPU8.subarray(addrZ, addrZ + this.settings.numLabels);
-        })
-      })
-    });
+  getSHA(): Promise<{ possible: string, transition: string  }> {
+    return cppDebug.getSHA()
   }
 
   private createU32(size: number, value: number[]): number {

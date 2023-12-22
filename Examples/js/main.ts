@@ -4,7 +4,7 @@ import { parseInput } from './lib/parse-input';
 import { getOverlapTileForLabel } from './lib/parse-overlapping';
 
 import SynthesizerWorker from './synthesizer.worker?worker';
-import { ModelType, OverlappingRender, SimpleTileRender, TiledModelRender } from './render';
+import { ModelType, OverlappingRender, RenderOverlappingTileset, SimpleTileRender, TiledModelRender } from './render';
 import { populateDropdown, query } from './setup';
 
 const sRandSeed = query('seed') || 0;
@@ -34,7 +34,7 @@ const run = async () => {
       resolve(ev.data);
     }
   });
-  const { width, height, depth, output } = data as { width: number, height: number, depth: number, output: ArrayBuffer };
+  const { width, height, depth, output, hashes } = data as { width: number, height: number, depth: number, output: ArrayBuffer, hashes: { possible: string, transition: string  } };
   const model = new Uint32Array(output);
   const getLabel = (x,y,z) => model[x + y * width + z * width * height];;
 
@@ -57,9 +57,14 @@ const run = async () => {
   const logDiv = document.createElement('div');
   const log = `sRand SEED: ${sRandSeed}\nPropagator - ${settings.useAc4 ? 'AC4' : 'AC3'}\n
         SampleName: ${sampleName}\nSize: ${width}x${height}x${depth}\n\n
-        TileCount: ${settings.numLabels} `;
+        TileCount: ${settings.numLabels}
+        transition: ${hashes.transition}
+        possibilityArray: ${hashes.possible}`;
   logDiv.innerText = log;
   document.body.appendChild(logDiv);
+  if(sample.tagName === 'overlapping') {
+    RenderOverlappingTileset(document.body, settings.numLabels, getImageDataForLabel);
+  }
 }
 
 run();

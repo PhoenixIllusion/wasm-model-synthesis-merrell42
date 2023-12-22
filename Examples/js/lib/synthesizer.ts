@@ -322,4 +322,8 @@ export class Synthesizer {
     }
     return true;
   }
+
+  getSHA(): Promise<{ possible: string, transition: string  }> {
+    return this.propagator.getSHA();
+  }
 }

@@ -18,7 +18,7 @@ body {
 	min-width: 32px;
 	min-height: 32px;
 }
-canvas.overlapping {
+canvas {
 	image-rendering: crisp-edges;
 	image-rendering: pixelated;
 }

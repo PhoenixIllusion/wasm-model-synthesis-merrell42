@@ -55,6 +55,25 @@ export function OverlappingRender(div: HTMLDivElement, size: Size,
 
     RenderFunction(size.width, size.height, size.depth, getLabel, drawTile)
   }
+export function RenderOverlappingTileset(div: HTMLElement, numLabels: number, getImageDataForLabel: (label: number)=>ImageData) {
+  const tileOut = document.createElement('div');
+  const tileCanvas = document.createElement('canvas');
+  tileOut.append(tileCanvas);
+  tileCanvas.width = 44;
+  tileCanvas.height = Math.ceil(numLabels / 10)*4+4;
+  const tileOutCtx = tileCanvas.getContext('2d')!;
+  tileCanvas.style.width = (tileCanvas.width*10) + 'px';
+  tileCanvas.style.height = (tileCanvas.height*10)+'px';
+  
+  let x = 0;
+  let y = 0;
+  for(let i=0;i<numLabels;i++) {
+    tileOutCtx.putImageData(getImageDataForLabel(i),x,y);
+    x+=4;
+    if(x > 40) { x = 0; y += 4}
+  }
+  div.append(tileOut);
+}
 
 
 import { PerspectiveCamera } from 'three/src/cameras/PerspectiveCamera';

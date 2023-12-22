@@ -114,7 +114,14 @@ const indexImage = (imageData: ImageData): IndexedImageData => {
 	data.forEach(rgba => 
 		indexSet.add(rgba)
 	)
-	const index = new Uint32Array([... indexSet.keys()].sort());
+	const tmp = new DataView(new Uint8Array(4).buffer);
+	const index = new Uint32Array([... indexSet.keys()].sort((a,b) => {
+		tmp.setUint32(0, a, false)
+		const A = tmp.getUint32(0, true);
+		tmp.setUint32(0, b, false);
+		return A - tmp.getUint32(0, true);
+
+	}));
 	const indexedData = new IndexDataClass([...data].map(key => index.indexOf(key)));
 	return {
 		index,
@@ -187,13 +194,14 @@ export async function parseOverlapping(node: Element, settings: ParsedInputHead,
 			for (let i = 1; i < config.symmetry; i++) {
 				let transform: (data: IndexDataSize, dir: number) => IndexDataSize;
 				if (i % 2 == 1) {
-					transform = reflectPatch;
+					const _patch = reflectPatch(data, N);
+					const hash = hashPatch(_patch);
+					incPatch(hash, _patch);
 				} else {
-					transform = rotatePatch;
+					data = rotatePatch(data, N);
+					const hash = hashPatch(data);
+					incPatch(hash, data);
 				}
-				data = transform(data, N);
-				const hash = hashPatch(data);
-				incPatch(hash, data);
 			}
 		}
 	}

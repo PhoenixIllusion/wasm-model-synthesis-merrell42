@@ -10,6 +10,7 @@ self.onmessage = async (e) => {
   
   const [width, height, depth] = settings.size;
   const output = synth.getModel();
+  const hashes = await synth.getSHA();
 
-  postMessage({ width, height, depth, output: output.buffer }, { transfer: [output.buffer] });
+  postMessage({ width, height, depth, output: output.buffer, hashes }, { transfer: [output.buffer] });
 }

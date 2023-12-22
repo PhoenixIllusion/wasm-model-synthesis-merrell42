@@ -1,8 +1,9 @@
 import initWASM from './lib/wasm/Merrel42ModelSynth.wasm.js';
 import Merrel42ModelSynth from './lib/wasm/Merrel42ModelSynth.wasm.js';
 import { readXML, SavePngData, LoadPngLookupR, makeStrW, XMLReader, LodePNG, IFStream, getU32, readImage, setWASM, readText, registerXMLDoc } from './example.js';
-import { ModelType, OverlappingRender, SimpleTileRender, TiledModelRender } from './render.js';
+import { ModelType, OverlappingRender, RenderOverlappingTileset, SimpleTileRender, TiledModelRender } from './render.js';
 import { populateDropdown, query } from './setup.js';
+import { Debug } from './lib/debug-propagator.js';
 
 const sRandSeed = query('seed') || 0;
 const sample = await populateDropdown(document.querySelector('select#sample-select')!);
@@ -32,8 +33,11 @@ const getImageDataForLabel = (label: number): ImageData => {
   return SavePngData[label].data;
 }
 
-initWASM({ XMLReader, IFStream, lodepng: LodePNG }).then(async function (module: typeof Merrel42ModelSynth) {
+const debug = new Debug();
+
+initWASM({ XMLReader, IFStream, lodepng: LodePNG, Debug: debug }).then(async function (module: typeof Merrel42ModelSynth) {
   setWASM(module);
+  debug.setHeaps(module);
 
   const timer = new module.Microseconds();
   const sampleEntry = registerXMLDoc(sample);
@@ -66,10 +70,17 @@ initWASM({ XMLReader, IFStream, lodepng: LodePNG }).then(async function (module:
   }
 
   const logDiv = document.createElement('div');
+  const hashData = await debug.getSHA();
   const log = `sRand SEED: ${sRandSeed}\nPropagator - ${settings.useAc4 ? 'AC4' : 'AC3'}\n
         SampleName: ${settings.name.c_str()}\nSize: ${width}x${height}x${depth}\n\n
-        TileCount: ${settings.numLabels}`;
+        TileCount: ${settings.numLabels}
+        transition: ${hashData.transition}
+        possibilityArray: ${hashData.possible}`;
+
   logDiv.innerText = log;
   document.body.appendChild(logDiv);
-  console.log(settings.size.get(0), settings.size.get(1), settings.size.get(2))
+  console.log(settings.size.get(0), settings.size.get(1), settings.size.get(2));
+  if(sample.tagName === 'overlapping') {
+    RenderOverlappingTileset(document.body, settings.numLabels, getImageDataForLabel);
+  }
 });
