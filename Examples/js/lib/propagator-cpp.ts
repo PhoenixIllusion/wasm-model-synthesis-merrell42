@@ -47,7 +47,7 @@ export class CppPropagator implements Propagator {
     this.propagator.setBlockLabel(label, this._tmpSizeRef);
   }
   isPossible(x: number, y: number, z: number, val: number): boolean {
-    return this.propagator.isPossible(x, y, z, z);
+    return this.propagator.isPossible(x, y, z, val);
   }
 
   removeLabel(label: number, pos: [number, number, number]) {

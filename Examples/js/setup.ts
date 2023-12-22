@@ -39,6 +39,9 @@ export async function populateDropdown(selectElement: HTMLSelectElement): Promis
     }
     sampleSelect.appendChild(option);
   });
-  sampleSelect.onchange = () => location.href = window.location.pathname+'?sample=' + sampleSelect.value + '&seed=' + sRandSeed;
+  const changeLoc = (value: string|number) => location.href = window.location.pathname+'?sample=' + value + '&seed=' + sRandSeed;
+  sampleSelect.onchange = () => changeLoc(sampleSelect.value)
+  document.querySelector('#next')!.addEventListener('click', () => {changeLoc(parseInt(sampleSelect.value,10) + 1);})
+  document.querySelector('#prev')!.addEventListener('click', () => {changeLoc(parseInt(sampleSelect.value,10) - 1);})
   return entries[sampleIndex];
 }
