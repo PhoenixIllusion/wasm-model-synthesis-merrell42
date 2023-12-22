@@ -70,12 +70,12 @@ initWASM({ XMLReader, IFStream, lodepng: LodePNG, Debug: debug }).then(async fun
   }
 
   const logDiv = document.createElement('div');
-  const hashData = await debug.getSHA();
+  const hashData = await getSHA(settings, model, [width, height, depth], module);
   const log = `sRand SEED: ${sRandSeed}\nPropagator - ${settings.useAc4 ? 'AC4' : 'AC3'}\n
         SampleName: ${settings.name.c_str()}\nSize: ${width}x${height}x${depth}\n\n
         TileCount: ${settings.numLabels}
         transition: ${hashData.transition}
-        possibilityArray: ${hashData.possible}`;
+        model: ${hashData.model}`;
 
   logDiv.innerText = log;
   document.body.appendChild(logDiv);
@@ -84,3 +84,47 @@ initWASM({ XMLReader, IFStream, lodepng: LodePNG, Debug: debug }).then(async fun
     RenderOverlappingTileset(document.body, settings.numLabels, getImageDataForLabel);
   }
 });
+
+function getModelData(model: Merrel42ModelSynth.Model, size: [number, number, number]): Uint32Array {
+  const [width, height, depth] = size;
+  
+  const modelData = new Uint32Array( width * height * depth);
+  const xy = width * height;
+  for (let z = 0; z < depth; z++)
+  for (let y = 0; y < height; y++) {
+    let line = [];
+    for (let x = 0; x < width; x++) {
+      const index = x + width * y + xy * z;
+      modelData[index] = model.get(x, y, z);
+    }
+  }
+  return modelData;
+}
+
+function getTransitionByteData(numLabels: number, transition: Uint8Array[][]): Uint8Array {
+  const transitionData = new Uint8Array( numLabels * numLabels * 3);
+    
+  let i = 0;
+  for(let z = 0; z < 3; z++)
+  for(let b = 0; b < numLabels; b++)
+  for(let a = 0; a < numLabels; a++)
+  transitionData[i++] = transition[z][a][b]? 1 : 0;
+
+  return transitionData;
+}
+
+async function getSHA(settings: Merrel42ModelSynth.InputSettings, model: Merrel42ModelSynth.Model, 
+        size: [ number, number, number],
+        module: typeof Merrel42ModelSynth): Promise<{ model: string, transition: string  }> {
+  const hashHex = (array: Uint8Array) => [...array]
+      .map((b) => b.toString(16).padStart(2, "0").toUpperCase())
+      .join(""); // convert bytes to hex string
+  const hashBuffer = async (buffer: ArrayBufferView) => {
+    const hash = await crypto.subtle.digest('SHA-1', buffer);
+    return hashHex(new Uint8Array(hash));
+  }
+  const decodedTransition = Debug.decodeTransition(module.getPointer(settings.transition), settings. numLabels, module.HEAPU32, module.HEAPU8);
+  const transitionHash = await hashBuffer(getTransitionByteData(settings.numLabels, decodedTransition));
+  const modelHash = await hashBuffer(getModelData(model, size));
+  return { transition: transitionHash, model: modelHash }
+}

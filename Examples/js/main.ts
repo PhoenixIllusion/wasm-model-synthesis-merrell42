@@ -34,7 +34,10 @@ const run = async () => {
       resolve(ev.data);
     }
   });
-  const { width, height, depth, output, hashes } = data as { width: number, height: number, depth: number, output: ArrayBuffer, hashes: { possible: string, transition: string  } };
+  const { width, height, depth, output, hashes } = data as {
+    width: number, height: number, depth: number,
+    output: ArrayBuffer,
+    hashes: { transition: string, model: string  } };
   const model = new Uint32Array(output);
   const getLabel = (x,y,z) => model[x + y * width + z * width * height];;
 
@@ -59,7 +62,7 @@ const run = async () => {
         SampleName: ${sampleName}\nSize: ${width}x${height}x${depth}\n\n
         TileCount: ${settings.numLabels}
         transition: ${hashes.transition}
-        possibilityArray: ${hashes.possible}`;
+        model: ${hashes.model}`;
   logDiv.innerText = log;
   document.body.appendChild(logDiv);
   if(sample.tagName === 'overlapping') {

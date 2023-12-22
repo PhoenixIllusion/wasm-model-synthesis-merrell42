@@ -323,7 +323,30 @@ export class Synthesizer {
     return true;
   }
 
-  getSHA(): Promise<{ possible: string, transition: string  }> {
-    return this.propagator.getSHA();
+  private getTransitionByteData(): Uint8Array {
+    const numLabels = this.settings.numLabels;
+    const transition = new Uint8Array( numLabels * numLabels * 3);
+      
+    let i = 0;
+    for(let z = 0; z < 3; z++)
+    for(let b = 0; b < numLabels; b++)
+    for(let a = 0; a < numLabels; a++)
+      transition[i++] = this.settings.transition[z][a][b]? 1 : 0;
+
+    return transition;
+  }
+
+  async getSHA(): Promise<{ model: string, transition: string  }> {
+    const hashHex = (array: Uint8Array) => [...array]
+        .map((b) => b.toString(16).padStart(2, "0").toUpperCase())
+        .join(""); // convert bytes to hex string
+    const hashBuffer = async (buffer: ArrayBufferView) => {
+      const hash = await crypto.subtle.digest('SHA-1', buffer);
+      return hashHex(new Uint8Array(hash));
+    }
+
+    const transition = await hashBuffer(this.getTransitionByteData());
+    const model = await hashBuffer(this.getModel());
+    return { transition, model }
   }
 }

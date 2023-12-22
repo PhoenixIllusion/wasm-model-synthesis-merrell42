@@ -36,7 +36,7 @@ export class Debug {
         this.size = this.getInt32Size(sizeAddr);
         this.offset = this.getInt32Size(offsetAddr);
         this.updatePossibleLabels(possibleLabelsAddr);
-        this.updateTransition(this.HEAPU32[settingsAddr/4 + 60/4]);
+        this.transition = Debug.decodeTransition(this.HEAPU32[settingsAddr/4 + 60/4], numLabels, this.HEAPU32, this.HEAPU8);
 
         //this.logTransition();
       }
@@ -44,27 +44,28 @@ export class Debug {
       //this.logPossibleLabels();
   }
 
-  updateTransition(address: number) {
-    this.transition = [];
-    const perDir = this.getPointerArray(address, 3);
-    perDir.forEach((aLabel,a) => {
-      this.transition[a] = [];
-      const aPtrs = this.getPointerArray(aLabel, this.numLabels);
-      aPtrs.forEach((bPtr,b) => {
-        this.transition[a][b] = this.HEAPU8.subarray(bPtr, bPtr + this.numLabels);
+  static decodeTransition(address: number, numLabels: number, HEAPU32: Uint32Array, HEAPU8: Uint8Array ): Uint8Array[][]  {
+    const transition: Uint8Array[][] = [];
+    const perDir = getPointerArray(address, 3, HEAPU32);
+    perDir.forEach((dirAddr,dir) => {
+      transition[dir] = [];
+      const aPtrs = getPointerArray(dirAddr, numLabels, HEAPU32);
+      aPtrs.forEach((bPtr,a) => {
+        transition[dir][a] = HEAPU8.subarray(bPtr, bPtr + numLabels);
       })
     });
+    return transition;
   }
   
   updatePossibleLabels(address: number) {
     this.possibleLabels = [];
-    const xPtrs = this.getPointerArray(address, this.possibilitySize[0]);
+    const xPtrs = getPointerArray(address, this.possibilitySize[0], this.HEAPU32);
     xPtrs.forEach((addrX,x) => {
       this.possibleLabels[x] = [];
-      const yPtrs = this.getPointerArray(addrX, this.possibilitySize[1]);
+      const yPtrs = getPointerArray(addrX, this.possibilitySize[1], this.HEAPU32);
       yPtrs.forEach((addrY,y) => {
         this.possibleLabels[x][y] = [];
-        const zPtrs = this.getPointerArray(addrY, this.possibilitySize[2]);
+        const zPtrs = getPointerArray(addrY, this.possibilitySize[2], this.HEAPU32);
         zPtrs.forEach((addrZ,z) => {
           this.possibleLabels[x][y][z] = this.HEAPU8.subarray(addrZ, addrZ + this.numLabels);
         })
@@ -101,9 +102,7 @@ export class Debug {
   }
 
 
-  getPointerArray(addr: number, len) {
-    return this.HEAPU32.subarray(addr/4, addr/4 + len);
-  }
+
 
   getInt32Size(addr: number) {
     return this.HEAP32.subarray(addr/4, addr/4+3)
@@ -116,36 +115,9 @@ export class Debug {
     while ((char = this.HEAPU8[idx]) != 0 && idx - start < 1024) { str.push(char); idx++; };
     return decoder.decode(new Uint8Array(str));
   }
-
-  async getSHA(): Promise<{ possible: string, transition: string  }> {
-    const hashHex = (array: Uint8Array) => [...array]
-        .map((b) => b.toString(16).padStart(2, "0").toUpperCase())
-        .join(""); // convert bytes to hex string
-    const hashBuffer = async (buffer: Uint8Array[][][]|Uint8Array[][]) => {
-      const data = buffer.flat(2);
-      const singleBuffer = combineArrayBufferView(data);
-      const hash = await crypto.subtle.digest('SHA-1', singleBuffer);
-      return hashHex(new Uint8Array(hash));
-    }
-    const possible = await hashBuffer(this.possibleLabels);
-    const transition = await hashBuffer(this.transition);
-    return { possible, transition};
-  }
 }
 const decoder = new TextDecoder();
 
-function combineArrayBufferView (views: ArrayBufferView[]) {
-  let length = 0
-  for (const v of views)
-      length += v.byteLength
-      
-  let buf = new Uint8Array(length)
-  let offset = 0
-  for (const v of views) {
-      const uint8view = new Uint8Array(v.buffer, v.byteOffset, v.byteLength)
-      buf.set(uint8view, offset)
-      offset += uint8view.byteLength
-  }
-  
-  return buf
+function getPointerArray(addr: number, len: number, HEAPU32: Uint32Array) {
+  return HEAPU32.subarray(addr/4, addr/4 + len);
 }
