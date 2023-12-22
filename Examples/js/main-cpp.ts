@@ -2,10 +2,12 @@ import initWASM from './lib/wasm/Merrel42ModelSynth.wasm.js';
 import Merrel42ModelSynth from './lib/wasm/Merrel42ModelSynth.wasm.js';
 import { readXML, SavePngData, LoadPngLookupR, makeStrW, XMLReader, LodePNG, IFStream, getU32, readImage, setWASM, readText, registerXMLDoc } from './example.js';
 import { ModelType, OverlappingRender, RenderOverlappingTileset, SimpleTileRender, TiledModelRender } from './render.js';
-import { populateDropdown, query } from './setup.js';
+import { populateDropdown, query, saveTestHashes } from './setup.js';
 import { Debug } from './lib/debug-propagator.js';
 
 const sRandSeed = query('seed') || 0;
+const sampleID = query('sample') || 0;
+const autoLoop = query('loop')||0;
 const sample = await populateDropdown(document.querySelector('select#sample-select')!);
 const sampleName = sample.getAttribute('name')!;
 
@@ -71,6 +73,11 @@ initWASM({ XMLReader, IFStream, lodepng: LodePNG, Debug: debug }).then(async fun
 
   const logDiv = document.createElement('div');
   const hashData = await getSHA(settings, model, [width, height, depth], module);
+  saveTestHashes(sRandSeed, sampleID, hashData);
+  if(autoLoop) {
+    (document.querySelector('#next')! as HTMLButtonElement).click();
+  }
+
   const log = `sRand SEED: ${sRandSeed}\nPropagator - ${settings.useAc4 ? 'AC4' : 'AC3'}\n
         SampleName: ${settings.name.c_str()}\nSize: ${width}x${height}x${depth}\n\n
         TileCount: ${settings.numLabels}

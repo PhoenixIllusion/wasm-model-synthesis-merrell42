@@ -62,10 +62,6 @@ export class CppPropagator implements Propagator {
     this.propagator.resetBlock();
   }
 
-  getSHA(): Promise<{ possible: string, transition: string  }> {
-    return cppDebug.getSHA()
-  }
-
   private createU32(size: number, value: number[]): number {
     const ref = (this.module as any)['_webidl_malloc'](size * 4);
     this.module.HEAPU32.set(value, ref / 4);

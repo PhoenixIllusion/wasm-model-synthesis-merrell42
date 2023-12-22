@@ -5,9 +5,10 @@ import { getOverlapTileForLabel } from './lib/parse-overlapping';
 
 import SynthesizerWorker from './synthesizer.worker?worker';
 import { ModelType, OverlappingRender, RenderOverlappingTileset, SimpleTileRender, TiledModelRender } from './render';
-import { populateDropdown, query } from './setup';
+import { loadTestHashes, populateDropdown, query } from './setup';
 
 const sRandSeed = query('seed') || 0;
+const sampleId = query('sample') || 0;
 const sample = await populateDropdown(document.querySelector('select#sample-select')!);
 const sampleName = sample.getAttribute('name')!;
 
@@ -65,6 +66,19 @@ const run = async () => {
         model: ${hashes.model}`;
   logDiv.innerText = log;
   document.body.appendChild(logDiv);
+
+  const testHashes = loadTestHashes(sRandSeed, sampleId);
+  if(testHashes) {
+    const hashTestOutput = document.createElement('div');
+    hashTestOutput.innerText = `
+      Ground Truth Hash:
+      transition: ${hashes.transition}
+      model: ${hashes.model}`;
+    document.body.appendChild(hashTestOutput);
+    hashTestOutput.style.color = (testHashes.model == hashes.model && testHashes.transition == hashes.transition)? 'darkgreen': 'red';
+    hashTestOutput.style.fontWeight = 'bold';
+  }
+
   if(sample.tagName === 'overlapping') {
     RenderOverlappingTileset(document.body, settings.numLabels, getImageDataForLabel);
   }

@@ -57,8 +57,4 @@ export class AsmPropagator implements Propagator {
   resetBlock(): void {
     this.module.resetBlock_PropagatorAc3(this.propagator);
   }
-
-  async getSHA(): Promise<{ possible: string, transition: string  }> {
-    return { possible: '', transition: ''};
-  }
 }
