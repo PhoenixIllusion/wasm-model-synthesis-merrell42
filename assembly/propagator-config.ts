@@ -32,48 +32,20 @@ export function create(
     numLabels, numDims, periodic
   );
 }
-export function transition(config: PropagatorConfig): usize {
+export function ptr_transition(config: PropagatorConfig): usize {
   return changetype<usize>(config.transition)
 }
-export function weights(config: PropagatorConfig): usize {
+export function ptr_weights(config: PropagatorConfig): usize {
   return changetype<usize>(config.weights)
 }
+export function ptr_supportingCount(config: PropagatorConfig): usize {
+  const numLabels = config.numLabels as u16;
+  const numDirections = 2 * config.numDims as u8;
+  const supportingCount = config.supportCount = ArrU16.new(numLabels * numDirections);
+  return changetype<usize>(supportingCount);
 
-export function computeSupport(config: PropagatorConfig): void {
-  if(!config.supporting) {
-    const numLabels = config.numLabels as u16;
-    const numDirections = 2 * config.numDims as u8;
-    const transition = config.transition;
-    const transitionSize = config.transitionSize;
-    const tmpU16 = ArrU16.new(numLabels);
-    const supportingCount = config.supportCount = ArrU16.new(numLabels * numDirections);
-    const supporting = config.supporting = ArrArrU16.new(numLabels * numDirections);
-	  for (let c: u16 = 0; c < numLabels; c++) {
-		  for (let dir: u8 = 0; dir < numDirections; dir++) {
-        let dim: u8 = dir / 2;
-        let sign: boolean = dir % 2 == 0;
-        let idx: u16 = 0;
-        if (sign) {
-          for (let b: u16 = 0; b < numLabels; b++) {
-            if (transition[transitionSize.get_xyz(b,c,dim)]) {
-              // b supports c in direction dir.
-              tmpU16[idx++] = b;
-            }
-          }
-        }
-        else {
-          for (let b: u16 = 0; b < numLabels; b++) {
-            if (transitionSize.get_xyz(c,b,dim)) {
-              // b supports c in direction dir.
-              tmpU16[idx++] = b;
-            }
-          }
-        }
-        const newArr = supporting[c * numDirections + dir] = ArrU16.new(idx);
-        memory.copy(changetype<usize>(newArr),changetype<usize>(tmpU16), idx * 2);
-        supportingCount[c * numDirections + (dir^1)] = idx;
-      }
-    }
-    tmpU16.free();
-  }
+}
+export function ptr_supporting(config: PropagatorConfig, size: u32): usize {
+  const supporting = config.supporting = ArrArrU16.new(size);
+  return changetype<usize>(supporting);
 }

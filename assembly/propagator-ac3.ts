@@ -13,6 +13,20 @@ export class PropagatorAc3 extends Propagator {
 
   }
 
+  pickLabel(x: i32, y: i32, z: i32): i32 {
+    const label = this.pickFromWeights( x, y, z);
+    if (label == -1) {
+      return -1;
+    }
+
+    const success = this.setBlockLabel(label, x, y, z);
+    if (success) {
+      return label;
+    } else {
+      return -1;
+    }
+  }
+
   // Remove a label in the block at the given position.
   removeLabel(label: i32, x: i32, y: i32, z: i32): boolean {
     const possibilitySize = this.possibilitySize;

@@ -24,7 +24,8 @@ export {
 
 export {
   create as PropagatorConfig_create,
-  transition as PropagatorConfig_transition,
-  weights as PropagatorConfig_weights, 
-  computeSupport as PropagatorConfig_computeSupport
+  ptr_transition as PropagatorConfig_ptr_transition,
+  ptr_weights as PropagatorConfig_ptr_weights, 
+  ptr_supporting as PropagatorConfig_ptr_supporting,
+  ptr_supportingCount as PropagatorConfig_ptr_supportingCount
 } from './propagator-config'

@@ -26,6 +26,20 @@ export class PropagatorAc4 extends Propagator {
     this.support = ArrU16.new(supportSize.xyzw * numDirections);
   }
 
+  pickLabel(x: i32, y: i32, z: i32): i32 {
+    const label = this.pickFromWeights( x, y, z);
+    if (label == -1) {
+      return -1;
+    }
+
+    const success = this.setBlockLabel(label, x, y, z);
+    if (success) {
+      return label;
+    } else {
+      return -1;
+    }
+  }
+
   addToQueue(x: u16, y: u16, z: u16, label: u16): void {
     this.updateQueue.push_backXYZW(x,y,z, label);
   }
@@ -92,17 +106,20 @@ export class PropagatorAc4 extends Propagator {
         const _support_xyzw = supportSize.xyzw;
 
         const dirSupporting = supporting[supportOffset + dir];
-        const dirSupportingSize = supportCount[supportOffset + dir];
+        const dirSupportingSize = supportCount[supportOffset + dir^1];
 
         const support = this.support;
 
         for (let i: u16 = 0; i < dirSupportingSize; i++) {
           let b: u16 = dirSupporting[i];
-          const xyzBb = (xyzB + _poss_xyz * b) as u32;
-          const xyzBbDir = xyzBb + _support_xyzw * dir;
-          support[xyzBbDir] = support[xyzBbDir] - 1;
-          if (support[xyzBbDir] == 0 && possibleLabels[xyzBb]) {
-            possibleLabels[xyzBb] = false;
+          //const xyzBb = (xyzB + _poss_xyz * b) as u32;
+          //const xyzBbDir = xyzBb + _support_xyzw * dir;
+          const newSupport = support[supportSize.get_xyzwd(xB,yB,zB,b,dir)] - 1;
+          support[supportSize.get_xyzwd(xB,yB,zB,b,dir)] = newSupport;
+          const possibleValueIdx = possibilitySize.get_xyzw(xB,yB,zB,b);
+          const possibleValue = possibleLabels[possibleValueIdx];
+          if (newSupport == 0 && possibleValue) {
+            possibleLabels[possibleValueIdx] = false;
             this.addToQueue(xB as u16, yB as u16, zB as u16, b as u16);
           }
         }

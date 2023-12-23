@@ -32,7 +32,7 @@ export class Dequeu64 {
     store<u16>(last, x);
     store<u16>(last, y, 2);
     store<u16>(last, z, 4);
-    store<u16>(last, z, 6);
+    store<u16>(last, w, 6);
     last += 8;
     if (last > this._end) {
       last = this._ref;

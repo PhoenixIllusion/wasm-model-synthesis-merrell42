@@ -25,7 +25,7 @@ const getImageDataForLabel = (label: number): ImageData => {
 const run = async () => {
 
   const settings = await parseInput(sample, true);
-  settings.useAc4 = false;
+  settings.useAc4 = true;
   settings.seed = sRandSeed;
 
   const worker = new SynthesizerWorker();
@@ -72,8 +72,8 @@ const run = async () => {
     const hashTestOutput = document.createElement('div');
     hashTestOutput.innerText = `
       Ground Truth Hash:
-      transition: ${hashes.transition}
-      model: ${hashes.model}`;
+      transition: ${testHashes.transition}
+      model: ${testHashes.model}`;
     document.body.appendChild(hashTestOutput);
     hashTestOutput.style.color = (testHashes.model == hashes.model && testHashes.transition == hashes.transition)? 'darkgreen': 'red';
     hashTestOutput.style.fontWeight = 'bold';

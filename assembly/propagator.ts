@@ -43,32 +43,11 @@ export abstract class Propagator {
 
 
   // Pick a random value given the weights. Higher weight means higher probability.
-  pickFromWeights(n: i32): i32 {
-    let sum: f32 = 0;
-    const weights = this.weights;
-    const cumulativeSums = this.cumulativeSums;
-    for (let i: i32 = 0; i < n; i++) {
-      sum += weights[i];
-      cumulativeSums[i] = sum;
-    }
-    if (sum == 0) {
-      return -1;
-    }
-
-    const randomValue = sum  * (rand() as f32)/RAND_MAX;
-    for (let i: i32 = 0; i < n; i++) {
-      const sumVal = cumulativeSums[i];
-      if (randomValue < sumVal) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  pickLabel(x: i32, y: i32, z: i32): i32 {
+  pickFromWeights(x: i32, y: i32, z: i32): i32 {
     const _weights = this._weights;
     const weights = this.weights;
     const numLabels = this.numLabels;
+    const cumulativeSums = this.cumulativeSums;
 
     for (let i: i32 = 0; i < numLabels; i++) {
       if (this.isPossible(x, y, z, i)) {
@@ -77,17 +56,25 @@ export abstract class Propagator {
         weights[i] = 0.0;
       }
     }
-    const label = this.pickFromWeights(numLabels);
-    if (label == -1) {
+
+
+    let sum: f32 = 0;
+    for (let i: i32 = 0; i < numLabels; i++) {
+      sum += weights[i];
+      cumulativeSums[i] = sum;
+    }
+    if (sum == 0) {
       return -1;
     }
 
-    const success = this.setBlockLabel(label, x, y, z);
-    if (success) {
-      return label;
-    } else {
-      return -1;
+    const randomValue = sum  * (rand() as f32)/RAND_MAX;
+    for (let i: i32 = 0; i < numLabels; i++) {
+      const sumVal = cumulativeSums[i];
+      if (randomValue < sumVal) {
+        return i;
+      }
     }
+    return -1;
   }
 
   // Set a label in the block at the given position.
@@ -97,6 +84,7 @@ export abstract class Propagator {
     return possibleLabels[possibilitySize.get_xyzw(x, y, z, label)];
   }
 
+  abstract pickLabel(x: i32, y: i32, z: i32): i32;
   abstract setBlockLabel(label: i32, x: i32, y: i32, z: i32): boolean;
   abstract removeLabel(label: i32, x: i32, y: i32, z: i32): boolean;
   abstract resetBlock(): void;

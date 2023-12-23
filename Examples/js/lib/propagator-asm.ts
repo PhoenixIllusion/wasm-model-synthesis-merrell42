@@ -1,6 +1,7 @@
 import { Propagator } from './propagator';
 import type CSP from './wasm/csp-ac-release'
 import { NativeInputSetting } from './native-input';
+import { Debug } from './debug-propagator';
 
 type Int3 = [number, number, number];
 
@@ -16,8 +17,8 @@ export async function create(settings: NativeInputSetting, offset: Int3, possibi
     ... offset,
     settings.numLabels, settings.numDims, settings.periodic
   );
-  const transitionRef = module.PropagatorConfig_transition(config);
-  const weightRef = module.PropagatorConfig_weights(config);
+  const transitionRef = module.PropagatorConfig_ptr_transition(config);
+  const weightRef = module.PropagatorConfig_ptr_weights(config);
 
   const numLabels = settings.numLabels;
   const transition = new Uint8Array(module.memory.buffer, transitionRef, numLabels * numLabels * 3);
@@ -33,6 +34,33 @@ export async function create(settings: NativeInputSetting, offset: Int3, possibi
   module.set_random_seed(settings.seed);
 
   if(settings.useAc4) {
+    const supportCount: number[] = [];
+    const supportOffsets: number[] = [];
+    const supportValues: number[] = [];
+    
+    settings.supportCount.forEach(dirCount => {
+      supportCount.push( ... dirCount);
+    })
+
+    let offset = 0;
+    settings.supporting.forEach(dirSupporting => {
+      dirSupporting.forEach(supporting => {
+        supportOffsets.push(offset);
+        supportValues.push(... supporting);
+        offset = supportValues.length * 2;
+      })
+    })
+    supportOffsets.forEach((x,i) => { supportOffsets[i] = x + supportOffsets.length * 4; })
+
+    const ptrCount = module.PropagatorConfig_ptr_supportingCount(config);
+    const ptrSupporting = module.PropagatorConfig_ptr_supporting(config, supportOffsets.length * 4 + supportValues.length * 2);
+    
+    const supportingCountMem = new Uint16Array(module.memory.buffer, ptrCount, supportCount.length);
+    supportingCountMem.set(supportCount);
+    const supportingMemLookup = new Uint32Array(module.memory.buffer, ptrSupporting, supportOffsets.length);
+    supportingMemLookup.set(supportOffsets);
+    const supportingMemValues = new Uint16Array(module.memory.buffer, ptrSupporting + supportOffsets.length * 4, supportValues.length);
+    supportingMemValues.set(supportValues);
     return new AsmPropagatorAc4(module, config);
   } else {
     return new AsmPropagatorAc3(module, config);
@@ -46,8 +74,6 @@ export class AsmPropagatorAc4 implements Propagator {
   constructor(
     private module: typeof CSP,
     config: ConfigRef) {
-
-    module.PropagatorConfig_computeSupport(config);
     this.propagator = module.PropagatorAc4_create(config);
   }
 
