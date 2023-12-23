@@ -11,6 +11,7 @@
       "textFile": "Examples/js/lib/wasm/csp-ac-release.wat",
       "sourceMap": true,
       "optimizeLevel": 3,
+      "optimizeSpeed": true,
       "shrinkLevel": 0,
       "converge": true,
       "noAssert": false

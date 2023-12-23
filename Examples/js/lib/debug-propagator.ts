@@ -102,31 +102,6 @@ export class Debug {
     console.log('Count '+(this.count++)+':\n'+xBuff.join('\n\n'));
   }
 
-  static getAsmSupport(config: NativeInputSetting, supportOffset: number, supportCountOffset: number, HEAPU32: Uint32Array, HEAPU16: Uint16Array): { support: number[][][], supportCount: number[][]} {
-    const numLabels = config.numLabels;
-    const numDirections = config.numDims * 2;
-    const support: number[][][] = [];
-    const supportCount: number[][] = [];
-
-
-    const supportEntries = getPointerArray(HEAPU32[supportOffset/4], numLabels * numDirections, HEAPU32);
-    const countEntries = getU16Array(HEAPU32[supportCountOffset/4], numLabels * numDirections, HEAPU16);
-    for(let c = 0; c < numLabels; c++) {
-      support[c] = [];
-      supportCount[c] = [];
-      for(let dir = 0; dir< numDirections; dir ++) {
-        supportCount[c][dir] = countEntries[c * numDirections + dir];
-        supportCount[c][dir^1] = countEntries[c * numDirections + dir^1];
-      }
-      for(let dir = 0; dir< numDirections; dir ++) {
-        support[c][dir] = [... getU16Array(supportEntries[c * numDirections + dir], supportCount[c][dir^1], HEAPU16) ];
-        support[c][dir^1] = [... getU16Array(supportEntries[c * numDirections + dir^1], supportCount[c][dir], HEAPU16) ];
-      }
-    }
-
-    return { support, supportCount}
-  }
-
   getInt32Size(addr: number) {
     return this.HEAP32.subarray(addr/4, addr/4+3)
   }

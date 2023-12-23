@@ -35,9 +35,9 @@ const run = async () => {
       resolve(ev.data);
     }
   });
-  const { width, height, depth, output, hashes } = data as {
+  const { width, height, depth, output, hashes, time } = data as {
     width: number, height: number, depth: number,
-    output: ArrayBuffer,
+    output: ArrayBuffer, time: number,
     hashes: { transition: string, model: string  } };
   const model = new Uint32Array(output);
   const getLabel = (x,y,z) => model[x + y * width + z * width * height];;
@@ -60,7 +60,8 @@ const run = async () => {
 
   const logDiv = document.createElement('div');
   const log = `sRand SEED: ${sRandSeed}\nPropagator - ${settings.useAc4 ? 'AC4' : 'AC3'}\n
-        SampleName: ${sampleName}\nSize: ${width}x${height}x${depth}\n\n
+        Time: ${time.toFixed(2)} ms
+        SampleName: ${sampleName}\nSize: ${width}x${height}x${depth}\n
         TileCount: ${settings.numLabels}
         transition: ${hashes.transition}
         model: ${hashes.model}`;

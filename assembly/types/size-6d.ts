@@ -30,7 +30,6 @@ export class Size6d {
     return x + y * this.x + z * this.xy + w * this.xyz + d * this.xyzw;
   }
 
-  @inline
   @operator('[]')
   get(index: AXIS): i32 {
     return index == 0 ? this.x : index == 1 ? this.y : this.z;

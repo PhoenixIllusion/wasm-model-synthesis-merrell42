@@ -49,7 +49,10 @@ initWASM({ XMLReader, IFStream, lodepng: LodePNG, Debug: debug }).then(async fun
   settings.useAc4 = true;
   const synth = new module.Synthesizer(settings, timer);
 
+
+  const _startTime = performance.now();
   synth.synthesize(timer);
+  const time = performance.now() - _startTime;
 
   const model = new module.Model(synth.getModel());
   const getLabel = (x,y,z) => model.get(x, y, z);
@@ -79,7 +82,8 @@ initWASM({ XMLReader, IFStream, lodepng: LodePNG, Debug: debug }).then(async fun
   }
 
   const log = `sRand SEED: ${sRandSeed}\nPropagator - ${settings.useAc4 ? 'AC4' : 'AC3'}\n
-        SampleName: ${settings.name.c_str()}\nSize: ${width}x${height}x${depth}\n\n
+        Time: ${time.toFixed(2)} ms
+        SampleName: ${settings.name.c_str()}\nSize: ${width}x${height}x${depth}\n
         TileCount: ${settings.numLabels}
         transition: ${hashData.transition}
         model: ${hashData.model}`;

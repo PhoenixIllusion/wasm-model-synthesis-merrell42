@@ -12,6 +12,7 @@ export class Dequeu64 {
     this._end = ref + size * 8;
 
   }
+  @inline
   push_backXYZ(x: u16, y: u16, z: u16): void {
     let last = this.last;
     store<u16>(last, x);
@@ -27,6 +28,7 @@ export class Dequeu64 {
     this.last = last;
   }
 
+  @inline
   push_backXYZW(x: u16, y: u16, z: u16, w: u16): void {
     let last = this.last;
     store<u16>(last, x);
@@ -43,6 +45,7 @@ export class Dequeu64 {
     this.last = last;
   }
   
+  @inline
   front(): ArrU16 {
     let first = this.first;
     if (first == this.last) {
@@ -50,6 +53,7 @@ export class Dequeu64 {
     }
     return changetype<ArrU16>(first);
   }
+  @inline
   pop_frontXYZ(): void {
     let first = this.first;
     if (first == this.last) {
@@ -62,6 +66,7 @@ export class Dequeu64 {
     this.first = first;
     return;
   }
+  @inline
   pop_frontXYZW(): void {
     let first = this.first;
     if (first == this.last) {
@@ -78,6 +83,7 @@ export class Dequeu64 {
   reset(): void {
     this.first = this.last = this._ref;
   }
+  @inline
   empty(): boolean {
     return this.first == this.last;
   }

@@ -14,12 +14,11 @@ export class ArrArrU16 {
 
   @inline
   static new(bytes: u32): ArrArrU16 {
-    const ref = heap.alloc(bytes + 8);
-    memory.fill(ref, 255, bytes + 4); //debug markers, data structure post-run should have 4 bytes of 0xFF and 4 bytes of 0x00 at end if not overrun
+    const ref = heap.alloc(bytes);
     return changetype<ArrArrU16>(ref);
   }
 
-  //@inline
+  @inline
   @operator('[]')
   getI(index: u32): ArrU16 {
     const ptr = changetype<usize>(this);

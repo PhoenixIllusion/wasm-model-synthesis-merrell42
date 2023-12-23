@@ -1,7 +1,6 @@
 import { Propagator } from './propagator';
 import type CSP from './wasm/csp-ac-release'
 import { NativeInputSetting } from './native-input';
-import { Debug } from './debug-propagator';
 
 type Int3 = [number, number, number];
 

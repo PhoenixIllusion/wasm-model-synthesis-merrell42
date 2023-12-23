@@ -64,6 +64,11 @@ export class PropagatorAc4 extends Propagator {
       const supportCount = this.supportCount;
       const supportOffset = labelC * numDirections;
 
+      const _poss_xyz = possibilitySize.xyz;
+      const possibleLabels = this.possibleLabels;
+      const supportSize = this.supportSize;
+      const _support_xyzw = supportSize.xyzw;
+      const support = this.support;
 
       for (let dir: u8 = 0; dir < numDirections; dir++) {
         let xB:i32 = xC;
@@ -98,28 +103,20 @@ export class PropagatorAc4 extends Propagator {
           case 5: if (zC >= possibilitySize[2] - offset[2] - 1) { continue; } break;
           }
         }
-        const _poss_xyz = possibilitySize.xyz;
-        const possibleLabels = this.possibleLabels;
-        const xyzB = possibilitySize.get_xyz(xB, yB, zB);
-    
-        const supportSize = this.supportSize;
-        const _support_xyzw = supportSize.xyzw;
 
+        const xyzB = possibilitySize.get_xyz(xB, yB, zB);
         const dirSupporting = supporting[supportOffset + dir];
         const dirSupportingSize = supportCount[supportOffset + dir^1];
 
-        const support = this.support;
-
         for (let i: u16 = 0; i < dirSupportingSize; i++) {
           let b: u16 = dirSupporting[i];
-          //const xyzBb = (xyzB + _poss_xyz * b) as u32;
-          //const xyzBbDir = xyzBb + _support_xyzw * dir;
-          const newSupport = support[supportSize.get_xyzwd(xB,yB,zB,b,dir)] - 1;
-          support[supportSize.get_xyzwd(xB,yB,zB,b,dir)] = newSupport;
-          const possibleValueIdx = possibilitySize.get_xyzw(xB,yB,zB,b);
-          const possibleValue = possibleLabels[possibleValueIdx];
+          const xyzBb = (xyzB + _poss_xyz * b) as u32;
+          const xyzBbDir = xyzBb + _support_xyzw * dir;
+          const newSupport = support[xyzBbDir] - 1;
+          support[xyzBbDir] = newSupport;
+          const possibleValue = possibleLabels[xyzBb];
           if (newSupport == 0 && possibleValue) {
-            possibleLabels[possibleValueIdx] = false;
+            possibleLabels[xyzBb] = false;
             this.addToQueue(xB as u16, yB as u16, zB as u16, b as u16);
           }
         }
@@ -173,16 +170,20 @@ export class PropagatorAc4 extends Propagator {
     const supportCount = this.supportCount;
     const support = this.support;
 
-    for (let x = 0; x < possibilitySize[0]; x++) {
-      for (let y = 0; y < possibilitySize[1]; y++) {
-        for (let z = 0; z < possibilitySize[2]; z++) {
-          for (let label = 0; label < numLabels; label++) {
-            for (let dir: u8 = 0; dir < numDirections; dir++) {
-              support[supportSize.get_xyzwd(x,y,z,label,dir)] = supportCount[label * numDirections + dir];
-            }
-          }
+    const _pos_xyz = supportSize.xyz;
+
+    for (let label = 0; label < numLabels; label++) {
+      for (let dir: u8 = 0; dir < numDirections; dir++) {
+        const count = supportCount[label * numDirections + dir];
+        const _xyz_offset = supportSize.get_xyzwd(0,0,0,label,dir);
+        /*
+        Equivalent to for z=0-to-depth,y=0-to-height,x=0-to-width, [x][y][z][label][dir] = count;
+        */
+        for(let i=0;i<_pos_xyz;i++) {
+          support[_xyz_offset + i] = count;
         }
       }
     }
+    return;
   }
 }
