@@ -1,6 +1,6 @@
 import { NativeInputSetting } from "./native-input";
 import { Propagator } from "./propagator";
-import { AsmPropagator } from "./propagator-asm";
+import { create as createAsmPropagator } from "./propagator-asm";
 import { CppPropagator } from "./propagator-cpp";
 
 const numAttempts = 20;
@@ -62,7 +62,7 @@ export class Synthesizer {
     this.possibilitySizeX = possibilitySize[0];
     this.possibilitySizeXY = possibilitySize[0] * possibilitySize[1];
 
-    this._propagator = AsmPropagator.create(settings, offset, possibilitySize);
+    this._propagator = createAsmPropagator(settings, offset, possibilitySize);
     //this._propagator = CppPropagator.create(settings, offset, possibilitySize);
   }
 

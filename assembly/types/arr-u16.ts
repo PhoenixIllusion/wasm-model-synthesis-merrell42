@@ -24,7 +24,7 @@ export class ArrU16 {
     const ptr = changetype<usize>(this);
     memory.fill(ptr, val, count * 2)
   }
-  free() {
+  free(): void {
     heap.free(changetype<usize>(this));
   }
 }

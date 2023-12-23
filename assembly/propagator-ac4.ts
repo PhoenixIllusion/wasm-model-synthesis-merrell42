@@ -17,16 +17,16 @@ export class PropagatorAc4 extends Propagator {
   private numDirections: u8;
   constructor(config: PropagatorConfig) {
     super(config);
-    this.numDirections = 2 * config.numDims;
+    const numDirections = this.numDirections = 2 * config.numDims;
     this.supporting = config.supporting;
     this.supportCount = config.supportCount;
 
     const possibilitySize = config.possibilitySize;
-    const supportSize = this.supportSize = new Size6d(possibilitySize[0], possibilitySize[1], possibilitySize[2], this.numLabels, this.numDirections);
-    this.support = ArrU16.new(supportSize.xyzw * this.numDirections);
+    const supportSize = this.supportSize = new Size6d(possibilitySize[0], possibilitySize[1], possibilitySize[2], config.numLabels, numDirections);
+    this.support = ArrU16.new(supportSize.xyzw * numDirections);
   }
 
-  addToQueue(x: u16, y: u16, z: u16, label: u16) {
+  addToQueue(x: u16, y: u16, z: u16, label: u16): void {
     this.updateQueue.push_backXYZW(x,y,z, label);
   }
 
@@ -35,9 +35,9 @@ export class PropagatorAc4 extends Propagator {
     const updateQueue = this.updateQueue;
     while (!updateQueue.empty()) {
       const update = updateQueue.front();
-      const xC = update[0];
-      const yC = update[1];
-      const zC = update[2];
+      const xC:i32 = update[0];
+      const yC:i32 = update[1];
+      const zC:i32 = update[2];
       const labelC = update[3];
 
       const offset = this.offset;
@@ -45,13 +45,13 @@ export class PropagatorAc4 extends Propagator {
       const possibilitySize = this.possibilitySize;
 
       const numDirections = this.numDirections;
-      const supportOffset = labelC * numDirections;
 
       const supporting = this.supporting;
       const supportCount = this.supportCount;
+      const supportOffset = labelC * numDirections;
 
 
-      for (let dir = 0; dir < numDirections; dir++) {
+      for (let dir: u8 = 0; dir < numDirections; dir++) {
         let xB:i32 = xC;
         let yB:i32 = yC;
         let zB:i32 = zC;
@@ -96,14 +96,14 @@ export class PropagatorAc4 extends Propagator {
 
         const support = this.support;
 
-        for (let i = 0; i < dirSupportingSize; i++) {
+        for (let i: u16 = 0; i < dirSupportingSize; i++) {
           let b: u16 = dirSupporting[i];
           const xyzBb = (xyzB + _poss_xyz * b) as u32;
           const xyzBbDir = xyzBb + _support_xyzw * dir;
           support[xyzBbDir] = support[xyzBbDir] - 1;
           if (support[xyzBbDir] == 0 && possibleLabels[xyzBb]) {
             possibleLabels[xyzBb] = false;
-            this.addToQueue(xB, yB, zB, b);
+            this.addToQueue(xB as u16, yB as u16, zB as u16, b as u16);
           }
         }
       }
@@ -160,7 +160,7 @@ export class PropagatorAc4 extends Propagator {
       for (let y = 0; y < possibilitySize[1]; y++) {
         for (let z = 0; z < possibilitySize[2]; z++) {
           for (let label = 0; label < numLabels; label++) {
-            for (let dir = 0; dir < numDirections; dir++) {
+            for (let dir: u8 = 0; dir < numDirections; dir++) {
               support[supportSize.get_xyzwd(x,y,z,label,dir)] = supportCount[label * numDirections + dir];
             }
           }

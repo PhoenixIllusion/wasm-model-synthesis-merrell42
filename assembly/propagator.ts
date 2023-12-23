@@ -35,7 +35,7 @@ export abstract class Propagator {
     this.weights = ArrF32.new(numLabels * 4);
     this.cumulativeSums = ArrF32.new(numLabels);
 
-    this.transitionSize = new Size(config.numLabels, config.numLabels, 6);
+    this.transitionSize = config.transitionSize;
     this.possibleLabels = ArrBoolean.new(config.possibilitySize.xyz * config.numLabels);
 
     this.updateQueue = new Dequeu64(12 << 10)//TODO - calc good size queue

@@ -19,8 +19,8 @@ export class ArrF32 {
     const ptr = changetype<usize>(this);
     store<f32>(ptr + index * 4, value);
   }
-  
-  free() {
+
+  free(): void {
     heap.free(changetype<usize>(this));
   }
 }

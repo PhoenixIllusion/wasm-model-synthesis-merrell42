@@ -22,7 +22,7 @@ export class ArrArrU16 {
     store<usize>(ptr + index * sizeof<usize>(), changetype<usize>(value));
   }
   
-  free() {
+  free(): void {
     heap.free(changetype<usize>(this));
   }
 }

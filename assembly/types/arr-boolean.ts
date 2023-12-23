@@ -26,7 +26,7 @@ export class ArrBoolean {
     memory.fill(ptr, val, count)
   }
   
-  free() {
+  free(): void {
     heap.free(changetype<usize>(this));
   }
 }
