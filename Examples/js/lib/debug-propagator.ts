@@ -101,9 +101,6 @@ export class Debug {
     console.log('Count '+(this.count++)+':\n'+xBuff.join('\n\n'));
   }
 
-
-
-
   getInt32Size(addr: number) {
     return this.HEAP32.subarray(addr/4, addr/4+3)
   }

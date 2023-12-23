@@ -39,9 +39,25 @@ export async function populateDropdown(selectElement: HTMLSelectElement): Promis
     }
     sampleSelect.appendChild(option);
   });
-  const changeLoc = (value: string|number) => location.href = window.location.pathname+'?sample=' + value + '&seed=' + sRandSeed;
+  const changeLoc = (value: string|number) => location.href = window.location.pathname+'?sample=' + value + '&seed=' + sRandSeed + (query('loop')?'&loop=1':'');
   sampleSelect.onchange = () => changeLoc(sampleSelect.value)
   document.querySelector('#next')!.addEventListener('click', () => {changeLoc(parseInt(sampleSelect.value,10) + 1);})
   document.querySelector('#prev')!.addEventListener('click', () => {changeLoc(parseInt(sampleSelect.value,10) - 1);})
   return entries[sampleIndex];
+}
+
+type TestHash = { model: string, transition: string  };
+type TestDataStore = { [seed: number]: {[testNum: number]: { model: string, transition: string  }}};
+
+export function loadTestHashes(seed: number, testID: number): TestHash {
+  const store = JSON.parse(localStorage.getItem('Merrel42ModelSynth')||'{}') as TestDataStore;
+  store[seed] = store[seed]||{};
+  return store[seed][testID]
+}
+
+export function saveTestHashes(seed: number, testID: number, hashData: TestHash) {
+  const store = JSON.parse(localStorage.getItem('Merrel42ModelSynth')||'{}') as TestDataStore;
+  store[seed] = store[seed]||{};
+  store[seed][testID] = hashData;
+  localStorage.setItem('Merrel42ModelSynth', JSON.stringify(store));
 }
