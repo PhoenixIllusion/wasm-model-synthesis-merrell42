@@ -1,4 +1,4 @@
-import { NativeInputSetting } from "./native-input";
+import { InputSetting } from "./input-settings";
 import { parseOverlapping } from "./parse-overlapping";
 import { parseSimpleTiled } from "./parse-simpletiled";
 import { parseTiledModel } from "./parse-tiled-model";
@@ -136,7 +136,7 @@ function computeSupport(transition: boolean[][][], numLabels: number, numDims: n
 	return { supporting, supportCount };
 }
 
-export const parseInput = async (node: Element, useAc4: boolean): Promise<NativeInputSetting> => {
+export const parseInput = async (node: Element, useAc4: boolean): Promise<InputSetting> => {
 	const head = parseInputHead(node);
 	const name = head.name;
 	if (head.type === 'simpletiled') {

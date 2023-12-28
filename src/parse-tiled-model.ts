@@ -3,7 +3,7 @@ import { ParsedInputBase, ParsedInputHead, createTransition } from "./parse-inpu
 export interface TiledModelConfig {
   name: string;
 }
-export async function parseTiledModel(node: Element, settings: ParsedInputHead, config: TiledModelConfig): Promise<ParsedInputBase> {
+export async function parseTiledModel(_node: Element, settings: ParsedInputHead, config: TiledModelConfig): Promise<ParsedInputBase> {
   const doc = await fetch('samples/' + config.name).then(res => res.text())
   const lines = doc.split('\n');
 
@@ -12,8 +12,8 @@ export async function parseTiledModel(node: Element, settings: ParsedInputHead, 
   lines.shift();
 
 
-  const trim = (str) => str.replace(/^\s+/, '').replace(/\s+$/, '');
-  const toInts = (str) => trim(str).split(/\s+/).map(x => parseInt(x, 10));
+  const trim = (str: string) => str.replace(/^\s+/, '').replace(/\s+$/, '');
+  const toInts = (str: string) => trim(str).split(/\s+/).map(x => parseInt(x, 10));
 
   const sizeLine = lines.shift()!;
   const [xSize, ySize, zSize] = toInts(sizeLine);
@@ -32,7 +32,7 @@ export async function parseTiledModel(node: Element, settings: ParsedInputHead, 
   for (let z = 0; z < zSize; z++) {
     lines.shift();
     for (let x = 0; x < xSize; x++) {
-      toInts(lines.shift()!).forEach((val, y) => {
+      toInts(lines.shift()!).forEach((val: number, y: number) => {
         example[x][y][z] = val;
       });
     }

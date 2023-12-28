@@ -1,6 +1,8 @@
-/Build
-/dist
-/Examples/js/lib/wasm/
-/Examples/js/**/*.d.ts
-/Examples/samples
+emscripten/Build
+emscripten/dist
+emscripten/Examples/js/lib/wasm/
+emscripten/Examples/js/**/*.d.ts
+emscripten/Examples/samples
 node_modules
+src/wasm/
+dist/

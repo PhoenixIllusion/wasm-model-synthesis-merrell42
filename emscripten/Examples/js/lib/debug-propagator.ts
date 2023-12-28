@@ -1,4 +1,4 @@
-import { NativeInputSetting } from "./native-input"
+import { NativeInputSetting } from "../../../../src/input-settings"
 
 interface HasHeaps {
   HEAPU32: Uint32Array,

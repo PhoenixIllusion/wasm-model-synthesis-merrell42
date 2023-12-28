@@ -1,13 +1,13 @@
 import { Propagator } from './propagator';
 import type CSP from './wasm/csp-ac-release'
-import { NativeInputSetting } from './native-input';
+import { InputSetting } from './input-settings';
 
 type Int3 = [number, number, number];
 
 type PropagatorRef = CSP.__Internref0;
 type ConfigRef = CSP.__Internref0;
 
-export async function create(settings: NativeInputSetting, offset: Int3, possibilitySize: Int3): Promise<Propagator> {
+export async function create(settings: InputSetting, offset: Int3, possibilitySize: Int3): Promise<Propagator> {
   const module = await import('./wasm/csp-ac-release');
 
   const config = module.PropagatorConfig_create(

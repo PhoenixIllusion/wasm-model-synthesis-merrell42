@@ -25,24 +25,8 @@ export function getU32(ref: number | any, len: number): Uint32Array {
 }
 
 
-export interface NativeInputSetting {
-  seed: number;
-  size: [number, number, number];
-  blockSize: [number, number, number];
-  numDims: number;
-  numLabels: number;
-  useAc4: boolean;
-  initialLabels: number[];
-  ground: number;
 
-  periodic: boolean;
-  transition: boolean[][][];
-  supporting: number[][][];
-  supportCount: number[][];
-  weights: number[];
-}
-
-export function createInputSettings(settings: NativeInputSetting): Merrel42ModelSynth.InputSettings {
+export function createInputSettings(settings: InputSetting): Merrel42ModelSynth.InputSettings {
   const inputSettings = new module.InputSettings();
   settings.size.forEach((v, i) =>
     inputSettings.size.set(v, i)

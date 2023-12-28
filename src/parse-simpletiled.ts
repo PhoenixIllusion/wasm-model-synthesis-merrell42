@@ -19,7 +19,7 @@ function addTileForLabel(label: number, path: string, version: number): void {
   tileLookup[label] = { path, version }
 }
 
-export async function parseSimpleTiled(node: Element, settings: ParsedInputHead, config: SimpleTiledConfig): Promise<ParsedInputBase> {
+export async function parseSimpleTiled(_node: Element, settings: ParsedInputHead, config: SimpleTiledConfig): Promise<ParsedInputBase> {
   const path = `samples/${config.name}/data.xml`;
   const xDataNode = await readXML(path);
   const xTilesNode = xDataNode.querySelector(':scope > tiles');
@@ -55,7 +55,7 @@ export async function parseSimpleTiled(node: Element, settings: ParsedInputHead,
     if (subset.length > 0 && subset.indexOf(name!) == -1) {
       return;
     }
-    const makeName = (name, j) => (j > 0) ? `${name} ${j}` : name;
+    const makeName = (name: string, j: number) => (j > 0) ? `${name} ${j}` : name;
     let versions = 1;
     const n = names.length;
     if (symmetry == "X") {

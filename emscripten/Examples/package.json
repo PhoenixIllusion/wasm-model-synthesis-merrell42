@@ -1,5 +1,5 @@
 {
-  "name": "@phoenixillusion/wasm-model-synthesis-merrell42-example",
+  "name": "@phoenixillusion/wasm-model-synthesis-merrell42-example-emscripten",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

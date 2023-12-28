@@ -18,5 +18,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["Examples/js/lib"]
+  "include": ["./src"]
 }

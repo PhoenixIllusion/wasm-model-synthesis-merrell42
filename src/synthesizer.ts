@@ -1,7 +1,6 @@
-import { NativeInputSetting } from "./native-input";
+import { InputSetting } from "./input-settings";
 import { Propagator } from "./propagator";
 import { create as createAsmPropagator } from "./propagator-asm";
-import { CppPropagator } from "./propagator-cpp";
 
 const numAttempts = 20;
 
@@ -25,7 +24,7 @@ export class Synthesizer {
   private _propagator: Promise<Propagator>;
   private propagator!: Propagator;
 
-  constructor(private settings: NativeInputSetting) {
+  constructor(private settings: InputSetting, propagator: (setting: InputSetting, offset: Int3, possibilitySize: Int3)=>Promise<Propagator> = createAsmPropagator) {
     const size = this.size = settings.size;
     const blockSize = this.blockSize = settings.blockSize;
     this.numLabels = settings.numLabels;
@@ -62,8 +61,7 @@ export class Synthesizer {
     this.possibilitySizeX = possibilitySize[0];
     this.possibilitySizeXY = possibilitySize[0] * possibilitySize[1];
 
-    this._propagator = createAsmPropagator(settings, offset, possibilitySize);
-    //this._propagator = CppPropagator.create(settings, offset, possibilitySize);
+    this._propagator = propagator(settings, offset, possibilitySize);
   }
 
   getModel() {

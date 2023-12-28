@@ -6,7 +6,8 @@
   "scripts": {
     "asbuild:debug": "asc assembly/index.ts --target debug",
     "asbuild:release": "asc assembly/index.ts --target release",
-    "asbuild": "npm run asbuild:debug && npm run asbuild:release"
+    "asbuild": "npm run asbuild:debug && npm run asbuild:release",
+    "build": "npm run asbuild:release && tsc && cp -r src/wasm dist/."
   },
   "repository": {
     "type": "git",
@@ -30,5 +31,11 @@
     "assemblyscript": "0.27.22",
     "typescript": "5.3.3"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  }
 }

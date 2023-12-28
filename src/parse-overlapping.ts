@@ -14,9 +14,6 @@ let canvas: OffscreenCanvas;
 let offscreenCanvas2D: OffscreenCanvasRenderingContext2D;
 
 // Return the index for an RGBA image.
-function rgba(x: number, y: number, N: number): number {
-	return 4 * (x + y * N);
-}
 function idx(x: number, y: number, N: number): number {
 	return (x + y * N);
 }
@@ -144,10 +141,10 @@ function addTileForLabel(label: number, data: IndexDataSize, index: Uint32Array,
 }
 
 function hashPatch(data: IndexDataSize): string {
-	return [...data].map((x, i) => ('00' + x.toString(16)).substr(-2)).join('');
+	return [...data].map((x) => ('00' + x.toString(16)).substr(-2)).join('');
 }
 
-export async function parseOverlapping(node: Element, settings: ParsedInputHead, config: OverlappingConfig): Promise<ParsedInputBase> {
+export async function parseOverlapping(_node: Element, settings: ParsedInputHead, config: OverlappingConfig): Promise<ParsedInputBase> {
 	const image = await readImage(`samples/${config.name}.png`);
 	const indexedImage = indexImage(image);
 	// Default size is 48 x 48.
@@ -192,7 +189,6 @@ export async function parseOverlapping(node: Element, settings: ParsedInputHead,
 			incPatch(hash, data);
 			// Reflect and rotate the patches depending on the symmetry.
 			for (let i = 1; i < config.symmetry; i++) {
-				let transform: (data: IndexDataSize, dir: number) => IndexDataSize;
 				if (i % 2 == 1) {
 					const _patch = reflectPatch(data, N);
 					const hash = hashPatch(_patch);

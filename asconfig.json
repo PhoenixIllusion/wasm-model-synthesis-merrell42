@@ -1,15 +1,15 @@
 {
   "targets": {
     "debug": {
-      "outFile": "Examples/js/lib/wasm/csp-ac-debug.wasm",
-      "textFile": "Examples/js/lib/wasm/csp-ac-debug.wat",
+      "outFile": "./src/wasm/csp-ac-debug.wasm",
+      "textFile": "./src/wasm/csp-ac-debug.wat",
       "sourceMap": true,
       "debug": true
     },
     "release": {
-      "outFile": "Examples/js/lib/wasm/csp-ac-release.wasm",
-      "textFile": "Examples/js/lib/wasm/csp-ac-release.wat",
-      "sourceMap": true,
+      "outFile": "./src/wasm/csp-ac-release.wasm",
+      "textFile": "./src/wasm/csp-ac-release.wat",
+      "sourceMap": false,
       "optimizeLevel": 3,
       "optimizeSpeed": true,
       "shrinkLevel": 0,
