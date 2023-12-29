@@ -5,7 +5,6 @@ function RenderFunction(width: number, height: number, depth: number,
   onLabel: (x: number, y: number, z: number, label: number)=>void): void {
     for (let z = 0; z < depth; z++)
     for (let y = 0; y < height; y++) {
-      let line = [];
       for (let x = 0; x < width; x++) {
         const label = getLabel(x,y,z);
         onLabel(x,y,z,label);

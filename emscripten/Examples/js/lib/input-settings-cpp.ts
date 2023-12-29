@@ -1,4 +1,5 @@
 import Merrel42ModelSynth from './wasm/Merrel42ModelSynth.wasm'
+import { InputSetting } from '@phoenixillusion/wasm-model-synthesis-merrell42'
 let module!: typeof Merrel42ModelSynth;
 
 export function setWASM(_module: typeof Merrel42ModelSynth) {
@@ -6,7 +7,7 @@ export function setWASM(_module: typeof Merrel42ModelSynth) {
 }
 
 export function createU32(size: number, value: number[]): number {
-  const ref = module['_webidl_malloc'](size * 4);
+  const ref = module._malloc(size * 4);
   module.HEAPU32.set(value, ref / 4);
   return ref;
 }

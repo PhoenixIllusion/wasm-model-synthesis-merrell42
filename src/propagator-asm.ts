@@ -1,14 +1,19 @@
 import { Propagator } from './propagator';
-import type CSP from './wasm/csp-ac-release'
+import { instantiate } from './wasm/csp-ac-release';
 import { InputSetting } from './input-settings';
+type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
+type CSP = Awaited<ReturnType<typeof instantiate>>;
+
 
 type Int3 = [number, number, number];
 
-type PropagatorRef = CSP.__Internref0;
-type ConfigRef = CSP.__Internref0;
 
-export async function create(settings: InputSetting, offset: Int3, possibilitySize: Int3): Promise<Propagator> {
-  const module = await import('./wasm/csp-ac-release');
+type PropagatorRef = ReturnType<CSP["PropagatorAc4_create"]>;
+type ConfigRef = ReturnType<CSP["PropagatorConfig_create"]>;
+
+export async function create(settings: InputSetting, offset: Int3, possibilitySize: Int3, wasmURL: string): Promise<Propagator> {
+  const Module = await WebAssembly.compileStreaming(fetch(wasmURL));
+  const module = await instantiate(Module, { env: {}});
 
   const config = module.PropagatorConfig_create(
     ... settings.size,
@@ -71,7 +76,7 @@ export class AsmPropagatorAc4 implements Propagator {
   private propagator: PropagatorRef;
 
   constructor(
-    private module: typeof CSP,
+    private module: CSP,
     config: ConfigRef) {
     this.propagator = module.PropagatorAc4_create(config);
   }
@@ -99,7 +104,7 @@ export class AsmPropagatorAc3 implements Propagator {
   private propagator: PropagatorRef;
 
   constructor(
-    private module: typeof CSP,
+    private module: CSP,
     config: ConfigRef) {
 
     this.propagator = module.PropagatorAc3_create(config);

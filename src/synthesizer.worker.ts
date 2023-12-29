@@ -1,10 +1,24 @@
-import { InputSetting } from './input-settings'
+import type { InputSetting } from './input-settings'
 import { Synthesizer } from './synthesizer';
+
+export interface WorkerRequest {
+  settings: InputSetting;
+  wasmURL: string;
+}; 
+export interface WorkerResponse {
+  output: ArrayBuffer;
+  hashes: { model: string, transition: string};
+  time: number;
+};
+
+export interface WorkerEvent {
+  data: WorkerResponse;
+}
 
 
 self.onmessage = async (e) => {
-  const settings = e.data as InputSetting;
-  const synth = new Synthesizer(settings);
+  const { settings, wasmURL } = e.data as WorkerRequest;
+  const synth = new Synthesizer(settings, wasmURL);
 
   const _startTime = performance.now();
   await synth.synthesize();
@@ -13,5 +27,6 @@ self.onmessage = async (e) => {
   const output = synth.getModel();
   const hashes = await synth.getSHA();
 
-  postMessage({ output: output.buffer, hashes, time }, { transfer: [output.buffer] });
+  const response: WorkerResponse = { output: output.buffer, hashes, time };
+  postMessage(response, { transfer: [output.buffer] });
 }

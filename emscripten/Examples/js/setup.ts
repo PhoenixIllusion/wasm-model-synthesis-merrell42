@@ -1,7 +1,7 @@
-import { readXML } from "./lib/xml-util";
+import { readXML } from "@phoenixillusion/wasm-model-synthesis-merrell42"
 
 const url = new URL(location.href);
-export const query = (key) => {
+export const query = (key: string) => {
   const val = url.searchParams.get(key);
   if (val) { return parseInt(val); }
   return 0;

@@ -1,8 +1,8 @@
 
 import type Merrel42ModelSynth from './wasm/Merrel42ModelSynth.wasm'
-import { NativeInputSetting, createInputSettings, setWASM as setInputWasm } from './native-input';
-import { Propagator } from './propagator';
+import { createInputSettings, setWASM as setInputWasm } from './input-settings-cpp';
 import { Debug } from './debug-propagator';
+import { Propagator, InputSetting } from '@phoenixillusion/wasm-model-synthesis-merrell42'
 
 type Int3 = [number, number, number];
 
@@ -16,9 +16,9 @@ export class CppPropagator implements Propagator {
 
   constructor(
       private module: typeof Merrel42ModelSynth,
-      private settings: NativeInputSetting,
+      settings: InputSetting,
       offset: Int3,
-      private possibilitySize: Int3) {
+      possibilitySize: Int3) {
     setInputWasm(module);
 
     module.Random.setRandomSeed(settings.seed)
@@ -35,7 +35,7 @@ export class CppPropagator implements Propagator {
     this._tmpInt3 = this.getU32(ptr, 3);
     this._tmpSizeRef = module.wrapPointer(ptr, module.SizeRef);
   }
-  static async create(settings: NativeInputSetting, offset: Int3, possibilitySize: Int3): Promise<CppPropagator> {
+  static async create(settings: InputSetting, offset: Int3, possibilitySize: Int3, _wasmUrl: string): Promise<CppPropagator> {
     const module = await import('./wasm/Merrel42ModelSynth.wasm');
     const merrel = await module.default({Debug: cppDebug});
     cppDebug.setHeaps(merrel);
@@ -63,7 +63,7 @@ export class CppPropagator implements Propagator {
   }
 
   private createU32(size: number, value: number[]): number {
-    const ref = (this.module as any)['_webidl_malloc'](size * 4);
+    const ref = this.module._malloc(size * 4);
     this.module.HEAPU32.set(value, ref / 4);
     return ref;
   }

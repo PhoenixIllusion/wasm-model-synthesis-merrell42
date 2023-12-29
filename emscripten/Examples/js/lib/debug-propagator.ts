@@ -1,5 +1,3 @@
-import { NativeInputSetting } from "../../../../src/input-settings"
-
 interface HasHeaps {
   HEAPU32: Uint32Array,
   HEAP32: Int32Array,
@@ -29,7 +27,7 @@ export class Debug {
     this.HEAPU8 = hasHeaps.HEAPU8;
   }
 
-  Propagator_onDebug(logAddr: number, settingsAddr: number, possibleLabelsAddr: number, possibilitySizeAddr: number,
+  Propagator_onDebug(_logAddr: number, settingsAddr: number, possibleLabelsAddr: number, possibilitySizeAddr: number,
     sizeAddr: number, offsetAddr: number, numLabels: number): void {
       if(this.possibleLabels.length == 0) {
         this.numLabels = numLabels;

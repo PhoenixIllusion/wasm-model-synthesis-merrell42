@@ -36,6 +36,21 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./worker": {
+      "import": "./dist/synthesizer.worker.js",
+      "types": "./dist/synthesizer.worker.d.ts"
+    },
+    "./synthesizer": {
+      "import": "./dist/synthesizer.js",
+      "types": "./dist/synthesizer.d.ts"
+    },
+    "./input-settings": {
+      "import": "./dist/input-settings.js",
+      "types": "./dist/input-settings.d.ts"
+    },
+    "./wasm": {
+      "import": "./dist/wasm/csp-ac-release.wasm"
     }
   }
 }

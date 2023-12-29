@@ -1,9 +1,8 @@
-import { readXML } from './lib/xml-util';
-import { getTileForLabel } from './lib/parse-simpletiled';
-import { parseInput } from './lib/parse-input';
-import { getOverlapTileForLabel } from './lib/parse-overlapping';
 
-import SynthesizerWorker from './synthesizer.worker?worker';
+import { parseInput, getOverlapTileForLabel, getTileForLabel } from '@phoenixillusion/wasm-model-synthesis-merrell42';
+import type { WorkerEvent } from '@phoenixillusion/wasm-model-synthesis-merrell42/worker';
+import WasmURL from '@phoenixillusion/wasm-model-synthesis-merrell42/wasm?url'
+import SynthesizerWorker from './lib/synthesizer.worker?worker';
 import { ModelType, OverlappingRender, RenderOverlappingTileset, SimpleTileRender, TiledModelRender } from './render';
 import { loadTestHashes, populateDropdown, query } from './setup';
 
@@ -27,20 +26,21 @@ const run = async () => {
   const settings = await parseInput(sample, true);
   settings.useAc4 = true;
   settings.seed = sRandSeed;
+  const [ width, height, depth ] = settings.size;
 
   const worker = new SynthesizerWorker();
-  worker.postMessage(settings);
+  worker.postMessage({ settings, wasmURL: WasmURL });
   const data = await new Promise(resolve => {
-    worker.onmessage = (ev) => {
+    worker.onmessage = (ev: WorkerEvent) => {
       resolve(ev.data);
     }
   });
-  const { width, height, depth, output, hashes, time } = data as {
+  const { output, hashes, time } = data as {
     width: number, height: number, depth: number,
     output: ArrayBuffer, time: number,
     hashes: { transition: string, model: string  } };
   const model = new Uint32Array(output);
-  const getLabel = (x,y,z) => model[x + y * width + z * width * height];;
+  const getLabel = (x: number,y: number,z: number) => model[x + y * width + z * width * height];;
 
   const size = { width, height, depth};
   const renderGrid = document.getElementById('container') as HTMLDivElement;
@@ -54,7 +54,7 @@ const run = async () => {
       OverlappingRender(renderGrid, size, getLabel, getImageDataForLabel )
       break;
     case 'tiledmodel':
-      TiledModelRender(renderGrid, size, getLabel, (label)=> '');
+      TiledModelRender(renderGrid, size, getLabel, (_label: number)=> '');
       break;
   }
 
