@@ -1,6 +1,9 @@
 Referenced in CMAKE - https://github.com/merrell42/model-synthesis/
 
+Assembly code ported from base Model Synthesis git repository above
 lodepng.cpp and xmlParser.cpp modified from files found in the third_party folder of model-synthesis
+
+License included below
 
 ================================================================================
 
