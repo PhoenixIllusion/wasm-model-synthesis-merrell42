@@ -41,6 +41,11 @@ export abstract class Propagator {
     this.updateQueue = new Dequeu64(12 << 10)//TODO - calc good size queue
   }
 
+  free(): void {
+    this.cumulativeSums.free();
+    this.possibleLabels.free();
+    this.updateQueue.free();
+  }
 
   // Pick a random value given the weights. Higher weight means higher probability.
   pickFromWeights(x: i32, y: i32, z: i32): i32 {

@@ -26,6 +26,12 @@ export class PropagatorAc4 extends Propagator {
     this.support = ArrU16.new(supportSize.xyzw * numDirections);
   }
 
+  free(): void {
+    super.free();
+    this.support.free();
+    heap.free(changetype<usize>(this.supportSize));
+  }
+
   pickLabel(x: i32, y: i32, z: i32): i32 {
     const label = this.pickFromWeights( x, y, z);
     if (label == -1) {

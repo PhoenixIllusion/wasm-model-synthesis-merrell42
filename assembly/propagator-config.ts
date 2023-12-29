@@ -7,8 +7,8 @@ export class PropagatorConfig {
   public transitionSize: Size;
   public weights: ArrF32;
 
-  public supporting!: ArrArrU16;
-  public supportCount!: ArrU16;
+  public supporting: ArrArrU16 = changetype<ArrArrU16>(0);
+  public supportCount: ArrU16 = changetype<ArrU16>(0);
 
   constructor(
     public size: Size, public possibilitySize: Size, public offset: Size,
@@ -16,6 +16,21 @@ export class PropagatorConfig {
     this.transition = ArrBoolean.new(numLabels * numLabels * 3);
     this.weights = ArrF32.new(numLabels);
     this.transitionSize = new Size(numLabels, numLabels, 6);
+  }
+
+  free(): void {
+    this.transition.free();
+    this.weights.free();
+    heap.free(changetype<usize>(this.size));
+    heap.free(changetype<usize>(this.possibilitySize));
+    heap.free(changetype<usize>(this.offset));
+    heap.free(changetype<usize>(this.transitionSize));
+    if(changetype<usize>(this.supportCount) !== 0) {
+      this.supporting.free();
+    }
+    if(changetype<usize>(this.supportCount) !== 0) {
+      this.supportCount.free();
+    }
   }
 }
 
@@ -48,4 +63,8 @@ export function ptr_supportingCount(config: PropagatorConfig): usize {
 export function ptr_supporting(config: PropagatorConfig, size: u32): usize {
   const supporting = config.supporting = ArrArrU16.new(size);
   return changetype<usize>(supporting);
+}
+
+export function free(config: PropagatorConfig): void {
+  config.free();
 }

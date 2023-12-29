@@ -28,3 +28,7 @@ export function isPossible(ac4: PropagatorAc4, x: i32, y: i32, z: i32, label: i3
 export function pickLabel(ac4: PropagatorAc4,x: i32, y: i32, z: i32): i32 {
   return ac4.pickLabel(x, y, z);
 }
+
+export function free(ac3: PropagatorAc4): void {
+  ac3.free();
+}

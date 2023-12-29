@@ -10,7 +10,8 @@ export {
   removeLabel as PropagatorAc3_removeLabel,
   resetBlock as PropagatorAc3_resetBlock,
   isPossible as PropagatorAc3_isPossible,
-  pickLabel as PropagatorAc3_pickLabel
+  pickLabel as PropagatorAc3_pickLabel,
+  free as PropagatorAc3_free
 } from './propagator-ac3-i'
 
 export {
@@ -19,7 +20,8 @@ export {
   removeLabel as PropagatorAc4_removeLabel,
   resetBlock as PropagatorAc4_resetBlock,
   isPossible as PropagatorAc4_isPossible,
-  pickLabel as PropagatorAc4_pickLabel
+  pickLabel as PropagatorAc4_pickLabel,
+  free as PropagatorAc4_free
 } from './propagator-ac4-i'
 
 export {
@@ -27,5 +29,6 @@ export {
   ptr_transition as PropagatorConfig_ptr_transition,
   ptr_weights as PropagatorConfig_ptr_weights, 
   ptr_supporting as PropagatorConfig_ptr_supporting,
-  ptr_supportingCount as PropagatorConfig_ptr_supportingCount
+  ptr_supportingCount as PropagatorConfig_ptr_supportingCount,
+  free as PropagatorConfig_free
 } from './propagator-config'

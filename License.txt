@@ -1,5 +1,14 @@
-All C,Cpp,Js,Ts and other code files not in the CMake Build directory have the following license.
-See merrel42-model-synthesis for licenses regarding compile time Examples sample folder contents 
+AssemblyScript rand/srand functionality taken from musl/emscripten code base /system/lib/libc/musl/src/prng/rand_r.c
+AssemblyScript files, Ac3 and Ac4, adapted from merrel42-model-synthesis functionality
+Typescript files [./src]
+- input-settings, parse-input, overlapping, simpletiled, and tiled-model code adapted from merrel42-model-synthesis
+- synthesizer code adapted from merrel42-model-synthesis
+
+https://github.com/merrell42/model-synthesis/ 
+See merrel42-model-synthesis for licenses regarding Emscripten compile time Examples sample folder contents 
+
+Code not adapted from merrel42-model-synthesis uses the following MIT license
+----------------------
 
 MIT License
 

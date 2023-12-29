@@ -9,8 +9,11 @@ export class PropagatorAc3 extends Propagator {
   constructor(config: PropagatorConfig) {
     super(config);
     this.inQueue = changetype<ArrBoolean>(heap.alloc(config.possibilitySize.xyz));
-    this.possibleLabels = changetype<ArrBoolean>(heap.alloc(config.possibilitySize.xyz * config.numLabels));
+  }
 
+  free(): void {
+    super.free();
+    this.inQueue.free();
   }
 
   pickLabel(x: i32, y: i32, z: i32): i32 {

@@ -10,8 +10,12 @@ export class Dequeu64 {
     const ref = heap.alloc(size * 8);
     this._ref = this.first = this.last = ref;
     this._end = ref + size * 8;
-
   }
+
+  free(): void {
+    heap.free(this._ref);
+  }
+
   @inline
   push_backXYZ(x: u16, y: u16, z: u16): void {
     let last = this.last;
